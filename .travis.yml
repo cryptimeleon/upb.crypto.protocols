@@ -1,14 +1,38 @@
 language: java
+install: true
 jdk:
 - openjdk8
 - openjdk11
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+stages:
+- name: build
+- name: snapshot
+  if: branch = master
+- name: release
+  if: branch = release
+jobs:
+  include:
+  - stage: build
+    script: "./gradlew build"
+  - stage: snapshot
+    script: "./gradlew publish -x test -Dsnapshot=true -Dnexus.user=$NEXUS_USER -Dnexus.key=$NEXUS_KEY
+      -Dbuild.number=$TRAVIS_BUILD_NUMBER"
+  - stage: release
+    script: "./gradlew publish -x test -Dnexus.user=$NEXUS_USER -Dnexus.key=$NEXUS_KEY
+      -Dbuild.number=$TRAVIS_BUILD_NUMBER"
 deploy:
   provider: releases
   api_key:
-    secure: MzB4DEXioCIPvQmcdA607N/o88BM73x3lJtoYoR58GqGivNMkGabQFwR4G0Umtq7ZC699VrKob9EOXnqn9XuN0wX0Yd92cCKAxrtK5kg2satJ/+6cpEjXPFB+SCHPkTY1dZCWh84HRPB30lrZSYSuTOsFBzsrEWhgVlDJaVPA43XH72Zj6Y04g2sDcSYlyIPb3XJ0P/RLb4oF2wDxrjBOe+o/FBX7QTyYly+CJiq2FmGZYYmAiwTPQ0/TV9MPxEe9tBupcopwy3dnx9vv+Zp9Hd6Wk991ZKXIdcMdWUpfYGVJux/jp0J46owsA2f/VqdciLpgJcgocJyZp1jsQDGy9JUw9kAdfDBct3ZOPiPNgqSItt7qKPIggdydceBHFaC0EvtT9O22KAukQoV52Ga6LirByJ8uXxZnszuYlw9HJPZfXMfUzfu7LVlUI6x6KtRclaSJHQfv8R3abwtJSgrvQZgW4s/Px17Fp8sTF16dOsAsVVEBlKVLY6zkjHxV0Q2Su02Uwq/UU7FMdYC/BMvx2VAIaGMD+syeFvUH9CxyuI+gdTOZs8u/1IsDCUP5bLYy8GHAkinQpD/BjRVJX3A1rqPbt6QJjmJOpRyigpN06yrm9fUw6pohggk4/wWJpU4QZEvJGUr/8UWFoG2lvwtJiIkCCB9vy5+mXKgo/E2UKo=
+    secure: UcQuJ2WP705+ZoIPsR5HyHlbrS078nfQgLkY1i11sE3eIbfYpBZ9sNly/Vz0v0ZBrFT35ZQ4By66oaue015YQgDqYXbilx7yRHixKCs5CFpzJ6Tn1yW8GbS39HEhKIdm8Oy7mPr/QNpF4E024D7ZLHJQiz5Lxa2qN4Y2uJvF1MWWTiqjrW58aV3bi8m5L/z8O00R8i07/8L9lMdK28a7JRIYJ+9KTVTQmwJXG9iIY0on9ua9BwD6JdZglX9KP8zqrXY0e62mqFP2ozSHcK9FciEpO+XzWnsnCNJExGv4P1GrPDpFpOdrQyzPSL/3KSXE+IL/dD9CHYI3Mco9ySGVrbWcDmC3BZud2MNgdPjsDcHUOpT69Mzfi27gRn5Du3Rem19Bs6akyNJRtPLvQweSMAzaIVtLq5izYxyXniJUQ35ERyGc2j43O7dOuJNkIjquoDaxzX5CZ+79mf7RFaGVHuO3hSLJ2DHrAYvXb2Wqiq6sJBpABB9vMewyeZhk5QYWqjNCAbnk7n99qYKW3g+hKDKCtdz6zDw4EG98yZdt/I7XwodKUszen5B8LTfT+WWPTTySc0TPz32sDaj3+M400FKIE0U/AkzxrVbsZjEQBIowxisvWH92LvABjBpGI1hi7/rGyrmoUqRe16XUb2f58IzbDK7R4HO+alTYAEONB3I=
   file_glob: true
   file: build/libs/*
   skip_cleanup: true
   on:
-    repo: upbcuk/upb.crypto.math
-    tags: true
+    repo: upbcuk/upb.crypto.protocols
+    branch: release
