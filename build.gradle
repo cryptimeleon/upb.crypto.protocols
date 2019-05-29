@@ -29,7 +29,7 @@ repositories {
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api group: 'de.upb.crypto', name: 'math', version: '1.0.0'
-    api group: 'de.upb.crypto', name: 'craco', version: '1.1.0'
+    api group: 'de.upb.crypto', name: 'craco', version: '1.1.1'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
@@ -39,7 +39,7 @@ dependencies {
     // Use JUnit 5 test framework
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.2.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.2.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
 
 }
 
