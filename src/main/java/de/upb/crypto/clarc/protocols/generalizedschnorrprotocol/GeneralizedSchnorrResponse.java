@@ -1,6 +1,6 @@
 package de.upb.crypto.clarc.protocols.generalizedschnorrprotocol;
 
-import de.upb.crypto.clarc.protocols.parameters.Response;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.math.serialization.ObjectRepresentation;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.StringRepresentation;

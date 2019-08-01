@@ -1,6 +1,6 @@
 package de.upb.crypto.clarc.protocols.damgardtechnique;
 
-import de.upb.crypto.clarc.protocols.parameters.Announcement;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.craco.commitment.interfaces.CommitmentValue;
 import de.upb.crypto.math.hash.annotations.AnnotatedUbrUtil;
 import de.upb.crypto.math.hash.annotations.UniqueByteRepresented;

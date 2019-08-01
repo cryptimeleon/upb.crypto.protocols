@@ -1,6 +1,9 @@
 package de.upb.crypto.clarc.protocols.generalizedschnorrprotocol;
 
 import de.upb.crypto.clarc.protocols.arguments.SigmaProtocol;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.clarc.protocols.expressions.SimpleZnElementPolicyFacts;
 import de.upb.crypto.clarc.protocols.expressions.SuperGroupElementPolicyFacts;
 import de.upb.crypto.clarc.protocols.expressions.ZnElementPolicyFacts;

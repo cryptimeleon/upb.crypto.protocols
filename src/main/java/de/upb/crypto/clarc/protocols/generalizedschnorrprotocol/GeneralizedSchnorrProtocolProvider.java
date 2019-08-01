@@ -5,7 +5,6 @@ import de.upb.crypto.clarc.protocols.expressions.comparison.GroupElementEquality
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.ProtocolProvider;
 import de.upb.crypto.clarc.protocols.parameters.EmptyWitness;
 import de.upb.crypto.clarc.protocols.parameters.Problem;
-import de.upb.crypto.clarc.protocols.parameters.Witness;
 import de.upb.crypto.clarc.protocols.protocolfactory.GeneralizedSchnorrProtocolFactory;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.AnnotatedRepresentationUtil;

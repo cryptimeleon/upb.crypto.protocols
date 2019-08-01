@@ -1,10 +1,9 @@
 package de.upb.crypto.clarc.protocols.arguments;
 
-import de.upb.crypto.clarc.protocols.parameters.Challenge;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
 import de.upb.crypto.clarc.protocols.parameters.Problem;
-import de.upb.crypto.clarc.protocols.parameters.Witness;
 import de.upb.crypto.clarc.protocols.simulator.SpecialHonestVerifierSimulator;
-import de.upb.crypto.clarc.protocols.simulator.Transcript;
+import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolTranscript;
 import de.upb.crypto.craco.interfaces.PublicParameters;
 
 import java.util.List;
@@ -14,10 +13,10 @@ public interface SpecialHonestVerifierZeroKnowledgeThreeWayAoK extends Interacti
      * In case an {@link SpecialHonestVerifierSimulator} can not actually be fulfilled it can be simulated.
      * <br>
      * A {@link SpecialHonestVerifierSimulator} takes a {@link Challenge} as input for the simulation to calculate a
-     * valid {@link Transcript}
+     * valid {@link SigmaProtocolTranscript}
      *
      * @return {@link SpecialHonestVerifierSimulator} for an execution of the
-     * {@link SpecialHonestVerifierZeroKnowledgeThreeWayAoK} which outputs a valid {@link Transcript} when
+     * {@link SpecialHonestVerifierZeroKnowledgeThreeWayAoK} which outputs a valid {@link SigmaProtocolTranscript} when
      * given a {@link Challenge} as input
      */
     @Override

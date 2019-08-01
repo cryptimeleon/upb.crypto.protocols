@@ -2,7 +2,6 @@ package de.upb.crypto.clarc.protocols.fiatshamirtechnique;
 
 import de.upb.crypto.clarc.protocols.arguments.InteractiveThreeWayAoK;
 import de.upb.crypto.clarc.protocols.parameters.Problem;
-import de.upb.crypto.clarc.protocols.parameters.Witness;
 import de.upb.crypto.math.serialization.StandaloneRepresentable;
 
 /**

@@ -1,6 +1,6 @@
 package de.upb.crypto.clarc.protocols.generalizedschnorrprotocol;
 
-import de.upb.crypto.clarc.protocols.parameters.Challenge;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.structures.zn.Zp;
 

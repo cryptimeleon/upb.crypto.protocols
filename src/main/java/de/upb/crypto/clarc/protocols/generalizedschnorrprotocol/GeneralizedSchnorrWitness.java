@@ -1,6 +1,5 @@
 package de.upb.crypto.clarc.protocols.generalizedschnorrprotocol;
 
-import de.upb.crypto.clarc.protocols.parameters.Witness;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.AnnotatedRepresentationUtil;
 import de.upb.crypto.math.serialization.annotations.Represented;

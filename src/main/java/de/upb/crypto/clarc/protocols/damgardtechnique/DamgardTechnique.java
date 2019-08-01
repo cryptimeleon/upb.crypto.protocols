@@ -1,10 +1,12 @@
 package de.upb.crypto.clarc.protocols.damgardtechnique;
 
+import de.upb.crypto.clarc.protocols.arguments.InteractiveArgument;
 import de.upb.crypto.clarc.protocols.arguments.SigmaProtocol;
 import de.upb.crypto.clarc.protocols.arguments.ZeroKnowledgeThreeWayAoK;
-import de.upb.crypto.clarc.protocols.parameters.Announcement;
-import de.upb.crypto.clarc.protocols.parameters.Challenge;
-import de.upb.crypto.clarc.protocols.parameters.Response;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
+import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocol;
 import de.upb.crypto.craco.commitment.interfaces.CommitmentPair;
 import de.upb.crypto.craco.commitment.interfaces.CommitmentScheme;
 import de.upb.crypto.craco.commitment.interfaces.CommitmentSchemePublicParameters;
@@ -33,19 +35,11 @@ import java.util.Arrays;
  * <p>
  * The result of Damgard's Technique is a 'Concurrent black-box zero knowledge three-way interactive argument of
  * knowledge'.
- * Therefore the announcement and Response are extended in such a way that they contain the needed information.
  */
-public class DamgardTechnique implements ZeroKnowledgeThreeWayAoK {
+public class DamgardTechnique implements InteractiveArgument {
 
-    @Represented
     private SigmaProtocol protocol;
-    @Represented
     private CommitmentScheme commitmentScheme;
-    @Represented
-    private CommitmentPair commitPair = null;
-    @RepresentedArray(elementRestorer = @Represented(structure = "protocol", recoveryMethod = Announcement
-            .RECOVERY_METHOD))
-    private Announcement[] announcements = null;
 
     /**
      * Constructor for a Sigma Protocol using Damgard's Technique

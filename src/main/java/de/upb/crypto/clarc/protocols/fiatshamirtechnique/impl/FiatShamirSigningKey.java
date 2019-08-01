@@ -2,7 +2,6 @@ package de.upb.crypto.clarc.protocols.fiatshamirtechnique.impl;
 
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.FiatShamirSignatureScheme;
 import de.upb.crypto.clarc.protocols.parameters.Problem;
-import de.upb.crypto.clarc.protocols.parameters.Witness;
 import de.upb.crypto.craco.interfaces.signature.SigningKey;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.AnnotatedRepresentationUtil;

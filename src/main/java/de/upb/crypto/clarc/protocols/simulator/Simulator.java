@@ -1,6 +1,7 @@
 package de.upb.crypto.clarc.protocols.simulator;
 
 import de.upb.crypto.clarc.protocols.arguments.InteractiveArgument;
+import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolTranscript;
 
 /**
  * Abstract class of an simulator. A Simulator simulates the execution of an interactive protocol. Therefore, it may
@@ -30,5 +31,5 @@ public abstract class Simulator<Argument extends InteractiveArgument> {
      *
      * @return an accepting transcript or the error Symbol
      */
-    public abstract Transcript simulate();
+    public abstract SigmaProtocolTranscript simulate();
 }

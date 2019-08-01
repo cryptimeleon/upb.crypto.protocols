@@ -1,9 +1,8 @@
 package de.upb.crypto.clarc.protocols.generalizedschnorrprotocol;
 
-import de.upb.crypto.clarc.protocols.parameters.Challenge;
-import de.upb.crypto.clarc.protocols.simulator.SigmaProtocolTranscript;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
 import de.upb.crypto.clarc.protocols.simulator.SpecialHonestVerifierSimulator;
-import de.upb.crypto.clarc.protocols.simulator.Transcript;
+import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolTranscript;
 import de.upb.crypto.math.interfaces.structures.FutureGroupElement;
 import de.upb.crypto.math.structures.zn.Zp;
 
@@ -33,7 +32,7 @@ public class GeneralizedSchnorrSimulator extends SpecialHonestVerifierSimulator 
      * @return an accepting transcript using the given challenge
      */
     @Override
-    public Transcript simulate(Challenge challenge) {
+    public SigmaProtocolTranscript simulate(Challenge challenge) {
         if (!(this.protocolInstance instanceof GeneralizedSchnorrProtocol)) {
             throw new IllegalArgumentException("The given protocol is not valid");
         }
@@ -70,6 +69,6 @@ public class GeneralizedSchnorrSimulator extends SpecialHonestVerifierSimulator 
         for (int j = 0; j < problem.length; j++)
             announcements[j] = new GeneralizedSchnorrAnnouncement(futureAnnouncements[j].get());
 
-        return new SigmaProtocolTranscript(announcements, generalizedSchnorrChallenge, responses, protocol);
+        return new de.upb.crypto.clarc.protocols.simulator.SigmaProtocolTranscript(announcements, generalizedSchnorrChallenge, responses, protocol);
     }
 }

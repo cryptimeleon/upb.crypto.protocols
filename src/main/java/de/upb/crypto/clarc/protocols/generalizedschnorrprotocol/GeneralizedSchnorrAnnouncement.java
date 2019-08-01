@@ -1,6 +1,6 @@
 package de.upb.crypto.clarc.protocols.generalizedschnorrprotocol;
 
-import de.upb.crypto.clarc.protocols.parameters.Announcement;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.math.hash.annotations.AnnotatedUbrUtil;
 import de.upb.crypto.math.hash.annotations.UniqueByteRepresented;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;

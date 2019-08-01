@@ -1,8 +1,8 @@
 package de.upb.crypto.clarc.protocols.arguments;
 
-import de.upb.crypto.clarc.protocols.parameters.Announcement;
-import de.upb.crypto.clarc.protocols.parameters.Challenge;
-import de.upb.crypto.clarc.protocols.parameters.Response;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.math.serialization.Representation;
 
 /**

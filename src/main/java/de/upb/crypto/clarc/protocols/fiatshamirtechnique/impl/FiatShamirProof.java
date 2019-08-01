@@ -2,8 +2,8 @@ package de.upb.crypto.clarc.protocols.fiatshamirtechnique.impl;
 
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.FiatShamirHeuristic;
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.Proof;
-import de.upb.crypto.clarc.protocols.parameters.Announcement;
-import de.upb.crypto.clarc.protocols.parameters.Response;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.craco.enc.sym.streaming.aes.ByteArrayImplementation;
 import de.upb.crypto.math.serialization.ListRepresentation;
 import de.upb.crypto.math.serialization.ObjectRepresentation;

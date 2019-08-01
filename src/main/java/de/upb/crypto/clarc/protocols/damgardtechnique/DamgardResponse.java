@@ -1,7 +1,7 @@
 package de.upb.crypto.clarc.protocols.damgardtechnique;
 
-import de.upb.crypto.clarc.protocols.parameters.Announcement;
-import de.upb.crypto.clarc.protocols.parameters.Response;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.craco.commitment.interfaces.OpenValue;
 import de.upb.crypto.math.serialization.*;
 

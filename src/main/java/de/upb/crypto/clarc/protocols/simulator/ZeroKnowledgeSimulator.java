@@ -1,6 +1,7 @@
 package de.upb.crypto.clarc.protocols.simulator;
 
 import de.upb.crypto.clarc.protocols.arguments.ZeroKnowledgeArgument;
+import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolTranscript;
 
 /**
  * A simulator for a (perfect) zero knowledge protocol. The simulator need to interact with the (dishonest) verifier
@@ -24,7 +25,7 @@ public class ZeroKnowledgeSimulator extends Simulator<ZeroKnowledgeArgument> {
      * @see Simulator#simulate()
      */
     @Override
-    public Transcript simulate() {
+    public SigmaProtocolTranscript simulate() {
         return null;
     }
 }

@@ -1,6 +1,6 @@
 package de.upb.crypto.clarc.protocols.generalizedschnorrprotocol;
 
-import de.upb.crypto.clarc.protocols.simulator.Transcript;
+import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolTranscript;
 import de.upb.crypto.math.interfaces.structures.Group;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ public class GeneralizedSchnorrSimulatorTest {
         GeneralizedSchnorrChallenge challenge = (GeneralizedSchnorrChallenge) schnorr.chooseChallenge();
         if (schnorr.verify(schnorr.generateAnnouncements(), challenge, schnorr.generateResponses(challenge))) {
             GeneralizedSchnorrSimulator simulator = new GeneralizedSchnorrSimulator(schnorr);
-            Transcript transcript = simulator.simulate(challenge);
+            SigmaProtocolTranscript transcript = simulator.simulate(challenge);
             assertTrue(schnorr.verify(transcript.getAnnouncements(), transcript.getChallenge(), transcript
                     .getResponses()));
         }

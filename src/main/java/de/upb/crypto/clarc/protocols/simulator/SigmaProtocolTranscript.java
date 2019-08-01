@@ -1,9 +1,9 @@
 package de.upb.crypto.clarc.protocols.simulator;
 
 import de.upb.crypto.clarc.protocols.arguments.SigmaProtocol;
-import de.upb.crypto.clarc.protocols.parameters.Announcement;
-import de.upb.crypto.clarc.protocols.parameters.Challenge;
-import de.upb.crypto.clarc.protocols.parameters.Response;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.AnnotatedRepresentationUtil;
 import de.upb.crypto.math.serialization.annotations.Represented;
@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * A general representation of a transcript for a sigma protocol
  */
-public class SigmaProtocolTranscript implements Transcript {
+public class SigmaProtocolTranscript implements de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolTranscript {
     @RepresentedArray(elementRestorer =
     @Represented(structure = "protocol", recoveryMethod = Announcement.RECOVERY_METHOD))
     private Announcement[] announcement;

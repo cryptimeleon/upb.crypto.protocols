@@ -1,7 +1,8 @@
 package de.upb.crypto.clarc.protocols.simulator;
 
 import de.upb.crypto.clarc.protocols.arguments.SpecialHonestVerifierZeroKnowledgeThreeWayAoK;
-import de.upb.crypto.clarc.protocols.parameters.Challenge;
+import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
+import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolTranscript;
 
 /**
  * A verifier for a Sigma protocol with special honest verifier property. The simulator is bounded to a special
@@ -29,7 +30,7 @@ public abstract class SpecialHonestVerifierSimulator extends Simulator<SpecialHo
      */
     @Override
     @Deprecated
-    public Transcript simulate() {
+    public SigmaProtocolTranscript simulate() {
         throw new IllegalStateException("This type of  simulate-method is not applicable for a " +
                 "SpecialHonestVerifierSimulator");
     }
@@ -43,6 +44,6 @@ public abstract class SpecialHonestVerifierSimulator extends Simulator<SpecialHo
      * @param challege used for the simulation.
      * @return an accepting transcript with the given challenge.
      */
-    public abstract Transcript simulate(Challenge challege);
+    public abstract SigmaProtocolTranscript simulate(Challenge challege);
 
 }
