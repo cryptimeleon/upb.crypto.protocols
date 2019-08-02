@@ -5,7 +5,6 @@ import de.upb.crypto.clarc.protocols.SecretInput;
 import de.upb.crypto.clarc.protocols.arguments.InteractiveArgument;
 import de.upb.crypto.clarc.protocols.arguments.InteractiveArgumentInstance;
 import de.upb.crypto.math.expressions.bool.BooleanExpression;
-import de.upb.crypto.math.serialization.Representable;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.v2.RepresentationRestorer;
 
@@ -58,7 +57,7 @@ public interface SigmaProtocol extends InteractiveArgument, RepresentationRestor
 
     @Override
     default InteractiveArgumentInstance instantiateProtocol(String role, CommonInput commonInput, SecretInput secretInput) {
-        return PROVER_ROLE.equals(role) ? new SigmaProtocolProverInstance(commonInput, secretInput) :
-                VERIFIER_ROLE.equals(role) ? new SigmaProtocolVerifierInstance(commonInput) : null;
+        return PROVER_ROLE.equals(role) ? new SigmaProtocolProverInstance(this, commonInput, secretInput) :
+                VERIFIER_ROLE.equals(role) ? new SigmaProtocolVerifierInstance(this, commonInput) : null;
     }
 }
