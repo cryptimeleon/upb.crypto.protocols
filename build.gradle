@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'de.upb.crypto.clarc'
-version = '1.0.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
+version = '1.0.0' + (Boolean.valueOf(System.getProperty("disablesnapshot")) ? "" : "-SNAPSHOT")
 
 description = """"""
 
@@ -28,8 +28,8 @@ repositories {
 }
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api group: 'de.upb.crypto', name: 'math', version: '1.0.0'
-    api group: 'de.upb.crypto', name: 'craco', version: '1.1.0'
+    api group: 'de.upb.crypto', name: 'math', version: '1.0.0' + (Boolean.valueOf(System.getProperty("disablesnapshot")) ? "" : "-SNAPSHOT")
+    api group: 'de.upb.crypto', name: 'craco', version: '1.1.0' + (Boolean.valueOf(System.getProperty("disablesnapshot")) ? "" : "-SNAPSHOT")
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
