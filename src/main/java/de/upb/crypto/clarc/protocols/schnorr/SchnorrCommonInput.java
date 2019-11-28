@@ -1,14 +1,13 @@
 package de.upb.crypto.clarc.protocols.schnorr;
 
 import de.upb.crypto.clarc.protocols.CommonInput;
-import de.upb.crypto.clarc.protocols.expressions.comparison.GroupElementEqualityExpression;
+import de.upb.crypto.clarc.protocols.base.AlgebraicVariableContext;
 import de.upb.crypto.math.expressions.Expression;
 import de.upb.crypto.math.expressions.group.GroupElementExpression;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 
 public class SchnorrCommonInput implements CommonInput {
     /**
@@ -26,7 +25,22 @@ public class SchnorrCommonInput implements CommonInput {
     /**
      * Substitutions that will be applied to expressions stored within SchnorrProtocol (excluding additionalStatements as seen above).
      */
-    protected Map<String, Expression> substitutionMap;
+    protected Function<String, Expression> substitutionMap;
+
+    public SchnorrCommonInput(List<GroupElementExpression> additionalHomomorphicPart, List<GroupElementExpression> additionalConstantPart, Function<String, Expression> substitutionMap) {
+        this.additionalHomomorphicPart = additionalHomomorphicPart;
+        this.additionalConstantPart = additionalConstantPart;
+        this.substitutionMap = substitutionMap;
+    }
+
+    public SchnorrCommonInput(Function<String, Expression> substitutionMap) {
+        this.substitutionMap = substitutionMap;
+    }
+
+    public SchnorrCommonInput(AlgebraicVariableContext ctxt) {
+        this.substitutionMap = ctxt::varContextGetExpr;
+    }
+
 
     public List<GroupElementExpression> getAdditionalHomomorphicPart() {
         return Collections.unmodifiableList(additionalHomomorphicPart);
@@ -36,7 +50,13 @@ public class SchnorrCommonInput implements CommonInput {
         return Collections.unmodifiableList(additionalConstantPart);
     }
 
-    public Map<String, Expression> getSubstitutionMap() {
-        return Collections.unmodifiableMap(substitutionMap);
+    public Function<String, Expression> getSubstitutionFunction() {
+        if (substitutionMap == null)
+            return s -> null;
+        return substitutionMap;
+    }
+
+    public boolean hasSubstitutions() {
+        return substitutionMap != null;
     }
 }

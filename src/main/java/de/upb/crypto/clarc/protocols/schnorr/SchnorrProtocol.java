@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class SchnorrProtocol implements SigmaProtocol { //TODO handle precomputation (either make user do it, offer it here, or enforce it always)
     /**
@@ -75,10 +76,11 @@ public class SchnorrProtocol implements SigmaProtocol { //TODO handle precomputa
         ArrayList<GroupElementExpression> effective = new ArrayList<>();
 
         //Add substituted homomorphic part object var
-        Map<String, Expression> substitutionMap = commonInput.getSubstitutionMap();
-        if (!substitutionMap.isEmpty())
+        if (commonInput.hasSubstitutions()) {
+            Function<String, Expression> substitutionMap = commonInput.getSubstitutionFunction();
             for (GroupElementExpression expr : homomorphicPart)
-                effective.add(expr.substitute(substitutionMap::get));
+                effective.add(expr.substitute(substitutionMap));
+        }
 
         //Add additional homomorphic parts
         effective.addAll(commonInput.getAdditionalHomomorphicPart());
@@ -90,10 +92,11 @@ public class SchnorrProtocol implements SigmaProtocol { //TODO handle precomputa
         ArrayList<GroupElementExpression> effective = new ArrayList<>();
 
         //Add substituted constant part object var
-        Map<String, Expression> substitutionMap = commonInput.getSubstitutionMap();
-        if (!substitutionMap.isEmpty())
+        if (commonInput.hasSubstitutions()) {
+            Function<String, Expression> substitutionMap = commonInput.getSubstitutionFunction();
             for (GroupElementExpression expr : constantPart)
-                effective.add(expr.substitute(substitutionMap::get));
+                effective.add(expr.substitute(substitutionMap));
+        }
 
         //Add additional constant parts
         effective.addAll(commonInput.getAdditionalConstantPart());

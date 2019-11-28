@@ -84,7 +84,7 @@ public class SchnorrInputPreparer {
         throw new UnsupportedOperationException("Not yet implemented"); //TODO. Go through expression, convert to GroupElementExpr (in additive group) and call prepareExpr with that.
     }
 
-    public static boolean isExponentAffineLinear(ExponentExpr expr, Predicate<String> isWitness) {
+    public static boolean isExponentAffineLinear(ExponentExpression expr, Predicate<String> isWitness) {
         if (isExponentConstant(expr, isWitness) || expr instanceof ExponentVariableExpr)
             return true;
 
@@ -114,7 +114,7 @@ public class SchnorrInputPreparer {
         throw new IllegalArgumentException("Cannot handle expressions of type "+expr.getClass().getName());
     }
 
-    public static boolean isExponentConstant(ExponentExpr expr, Predicate<String> isWitnesss) {
+    public static boolean isExponentConstant(ExponentExpression expr, Predicate<String> isWitnesss) {
         if (expr instanceof ExponentEmptyExpr)
             return true;
         return expr.getVariables().stream().noneMatch(isWitnesss); //TODO this check may be somewhat inefficient.
