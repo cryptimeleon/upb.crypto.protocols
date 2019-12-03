@@ -8,23 +8,19 @@ import de.upb.crypto.math.serialization.annotations.v2.ReprUtil;
 
 import java.util.HashMap;
 
-public abstract class AlgebraicBaseProtocolInstance implements TwoPartyProtocolInstance, AlgebraicVariableContext {
+public abstract class BaseProtocolInstance implements TwoPartyProtocolInstance {
     static final String HIGH_LEVEL_PROT_MSGS = "high_level_prot_msgs";
 
-    private AlgebraicBaseProtocol protocol;
+    private BaseProtocol protocol;
     private String role;
     protected int round = 0;
     private HashMap<String, TwoPartyProtocolInstance> newSubprotocolInstances = new HashMap<>();
     private HashMap<String, TwoPartyProtocolInstance> runningSubprotocolInstances = new HashMap<>();
     private HashMap<String, Representation> valuesToSendNext = new HashMap<>();
     private HashMap<String, Representation> valuesReceived = new HashMap<>();
-    /**
-     * A util for this object.
-     */
-    private ReprUtil reprUtil = new ReprUtil(this);
     private boolean highLevelWantsTerminate = false;
 
-    public AlgebraicBaseProtocolInstance(AlgebraicBaseProtocol protocol, String role) {
+    public BaseProtocolInstance(BaseProtocol protocol, String role) {
         this.protocol = protocol;
         this.role = role;
         this.round = this.sendsFirstMessage() ? 0 : 1;
@@ -39,14 +35,16 @@ public abstract class AlgebraicBaseProtocolInstance implements TwoPartyProtocolI
         newSubprotocolInstances.put(instanceName, instance);
     }
 
-    protected void send(String id) {
-        Representation repr = reprUtil.serializeSingleField(id);
+    protected void send(String id, Representation repr) {
+        if (id == null || id.equals(HIGH_LEVEL_PROT_MSGS))
+            throw new IllegalArgumentException("illegal id");
         valuesToSendNext.put(id, repr);
     }
 
-    protected void receive(String id) {
-        reprUtil.deserializeSingleField(id, valuesReceived.get(id));
-        valuesReceived.remove(id); //done with that.
+    protected Representation receive(String id) {
+        Representation received = valuesReceived.get(id);
+        valuesReceived.remove(id);
+        return received;
     }
 
     protected void terminate() {
@@ -55,10 +53,12 @@ public abstract class AlgebraicBaseProtocolInstance implements TwoPartyProtocolI
 
     @Override
     public Representation nextMessage(Representation received) {
-        ObjectRepresentation toSend = new ObjectRepresentation();
+        ObjectRepresentation toSend = new ObjectRepresentation(); //what to send this round.
 
         //High-level protocol receiving (send()/receive() methods)
-        received.obj().get(HIGH_LEVEL_PROT_MSGS).obj().forEach(e -> valuesReceived.put(e.getKey(), e.getValue()));
+        received.obj().get(HIGH_LEVEL_PROT_MSGS).obj().forEach(e -> {
+            valuesReceived.putIfAbsent(e.getKey(), e.getValue()); //don't allow sender to overwrite unretrieved values in the valuesReceived map.
+        });
 
         //Advance subprotocols
         runningSubprotocolInstances.forEach( (name, instance) -> {
@@ -77,7 +77,7 @@ public abstract class AlgebraicBaseProtocolInstance implements TwoPartyProtocolI
         //High-level protocol sending (send()/receive() methods)
         ObjectRepresentation high_level_prot_msgs = new ObjectRepresentation();
         valuesToSendNext.forEach(high_level_prot_msgs::put);
-        valuesToSendNext = new HashMap<>();
+        valuesToSendNext = new HashMap<>(); //reset for next round
         toSend.put(HIGH_LEVEL_PROT_MSGS, high_level_prot_msgs);
 
         //Subprotocol handling for newly added sub-protocols

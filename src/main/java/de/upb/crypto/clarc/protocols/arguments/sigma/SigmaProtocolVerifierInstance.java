@@ -1,7 +1,6 @@
 package de.upb.crypto.clarc.protocols.arguments.sigma;
 
 import de.upb.crypto.clarc.protocols.CommonInput;
-import de.upb.crypto.clarc.protocols.SecretInput;
 import de.upb.crypto.clarc.protocols.arguments.InteractiveArgument;
 import de.upb.crypto.math.expressions.bool.BooleanExpression;
 import de.upb.crypto.math.serialization.Representation;

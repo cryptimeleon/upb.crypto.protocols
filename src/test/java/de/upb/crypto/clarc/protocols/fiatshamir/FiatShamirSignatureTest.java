@@ -1,6 +1,5 @@
 package de.upb.crypto.clarc.protocols.fiatshamir;
 
-import de.upb.crypto.clarc.protocols.fiatshamirtechnique.FiatShamirSignatureScheme;
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.ProtocolProvider;
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.impl.FiatShamirSignature;
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.impl.FiatShamirSigningKey;

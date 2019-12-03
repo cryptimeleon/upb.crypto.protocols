@@ -48,7 +48,7 @@ public class SchnorrInputPreparer {
             if (((GroupPowExpr) expr).getExponent().getVariables().stream().anyMatch(isWitness)) { //exponent contains a witness, all this needs to be on homomorphic side
                 if (!isExponentAffineLinear(((GroupPowExpr) expr).getExponent(), isWitness))
                     throw new IllegalArgumentException("Cannot handle nonlinear exponent");
-                return new GroupElementExpression[]{expr, new GroupEmptyExpr()};
+                return new GroupElementExpression[]{expr, new GroupEmptyExpr(expr.getGroup())};
             } else { //exponent doesn't contain witness. So let's separate the stuff below and then apply the exponentiation to both homormorphic and constant part.
                 GroupElementExpression[] res = separateConstantAndHomomorphicTerms(((GroupPowExpr) expr).getBase(), isWitness);
                 if (!(res[0] instanceof GroupEmptyExpr)) //if res[0] instanceof GroupEmptyExpr, all's fine. If it isn't, res[0] is already homomorphic, so exponentiation with another variable will make it non-homomorphic (quadratic term in exponent).
@@ -64,7 +64,7 @@ public class SchnorrInputPreparer {
         }
 
         if (expr instanceof GroupElementConstantExpr) {
-            return new GroupElementExpression[] {new GroupEmptyExpr(), expr};
+            return new GroupElementExpression[] {new GroupEmptyExpr(expr.getGroup()), expr};
         }
 
         if (expr instanceof GroupVariableExpr && isWitness.test(((GroupVariableExpr) expr).getName())) {
@@ -73,7 +73,7 @@ public class SchnorrInputPreparer {
 
         //That's all we were able to do. If this expression is of some other type, that's fine as long as it's a constant.
         if (expr.getVariables().stream().noneMatch(isWitness)) {
-            return new GroupElementExpression[] {new GroupEmptyExpr(), expr};
+            return new GroupElementExpression[] {new GroupEmptyExpr(expr.getGroup()), expr};
         }
 
         throw new UnsupportedOperationException("Cannot handle expressions of type "+expr.getClass().getName());
@@ -84,7 +84,7 @@ public class SchnorrInputPreparer {
         throw new UnsupportedOperationException("Not yet implemented"); //TODO. Go through expression, convert to GroupElementExpr (in additive group) and call prepareExpr with that.
     }
 
-    public static boolean isExponentAffineLinear(ExponentExpression expr, Predicate<String> isWitness) {
+    public static boolean isExponentAffineLinear(ExponentExpr expr, Predicate<String> isWitness) {
         if (isExponentConstant(expr, isWitness) || expr instanceof ExponentVariableExpr)
             return true;
 
@@ -114,7 +114,7 @@ public class SchnorrInputPreparer {
         throw new IllegalArgumentException("Cannot handle expressions of type "+expr.getClass().getName());
     }
 
-    public static boolean isExponentConstant(ExponentExpression expr, Predicate<String> isWitnesss) {
+    public static boolean isExponentConstant(ExponentExpr expr, Predicate<String> isWitnesss) {
         if (expr instanceof ExponentEmptyExpr)
             return true;
         return expr.getVariables().stream().noneMatch(isWitnesss); //TODO this check may be somewhat inefficient.

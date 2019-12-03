@@ -1,8 +1,6 @@
 package de.upb.crypto.clarc.protocols.serialization.classes;
 
 import de.upb.crypto.clarc.protocols.arguments.SigmaProtocol;
-import de.upb.crypto.clarc.protocols.fiatshamirtechnique.FiatShamirHeuristic;
-import de.upb.crypto.clarc.protocols.fiatshamirtechnique.FiatShamirSignatureScheme;
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.impl.FiatShamirProof;
 import de.upb.crypto.clarc.protocols.generalizedschnorrprotocol.GenSchnorrTestdataProvider;
 import de.upb.crypto.clarc.protocols.generalizedschnorrprotocol.GeneralizedSchnorrProtocolProvider;

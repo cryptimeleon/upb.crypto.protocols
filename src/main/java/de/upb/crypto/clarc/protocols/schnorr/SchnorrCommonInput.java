@@ -1,7 +1,6 @@
 package de.upb.crypto.clarc.protocols.schnorr;
 
 import de.upb.crypto.clarc.protocols.CommonInput;
-import de.upb.crypto.clarc.protocols.base.AlgebraicVariableContext;
 import de.upb.crypto.math.expressions.Expression;
 import de.upb.crypto.math.expressions.group.GroupElementExpression;
 
@@ -36,11 +35,6 @@ public class SchnorrCommonInput implements CommonInput {
     public SchnorrCommonInput(Function<String, Expression> substitutionMap) {
         this.substitutionMap = substitutionMap;
     }
-
-    public SchnorrCommonInput(AlgebraicVariableContext ctxt) {
-        this.substitutionMap = ctxt::varContextGetExpr;
-    }
-
 
     public List<GroupElementExpression> getAdditionalHomomorphicPart() {
         return Collections.unmodifiableList(additionalHomomorphicPart);

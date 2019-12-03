@@ -1,13 +1,15 @@
 package de.upb.crypto.clarc.protocols.damgardtechnique;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
-import de.upb.crypto.craco.commitment.interfaces.CommitmentValue;
+import de.upb.crypto.craco.commitment.interfaces.Commitment;
+import de.upb.crypto.craco.commitment.interfaces.CommitmentScheme;
 import de.upb.crypto.math.hash.annotations.AnnotatedUbrUtil;
 import de.upb.crypto.math.hash.annotations.UniqueByteRepresented;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.AnnotatedRepresentationUtil;
-import de.upb.crypto.math.serialization.annotations.Represented;
+import de.upb.crypto.math.serialization.annotations.v2.ReprUtil;
+import de.upb.crypto.math.serialization.annotations.v2.Represented;
 
 /**
  * The DamgardAnnouncement is the commitment of an announcement of the original Sigma-Protocol
@@ -15,29 +17,26 @@ import de.upb.crypto.math.serialization.annotations.Represented;
 class DamgardAnnouncement implements Announcement {
 
     @UniqueByteRepresented
-    @Represented
-    private CommitmentValue commitmentValue;
+    @Represented(restorer = "com")
+    private Commitment commitmentValue;
 
     /**
      * Constructor for DamgardAnnouncement
      *
      * @param commitmentValue commitvalue for announcements from Damgard's Technique
      */
-    public DamgardAnnouncement(CommitmentValue commitmentValue) {
+    public DamgardAnnouncement(Commitment commitmentValue) {
         this.commitmentValue = commitmentValue;
     }
 
-    public DamgardAnnouncement(Representation representation) {
-        AnnotatedRepresentationUtil.restoreAnnotatedRepresentation(representation, this);
+    public DamgardAnnouncement(Representation representation, CommitmentScheme commitmentScheme) {
+        new ReprUtil(this).register(commitmentScheme, "com").deserialize(representation);
     }
 
-    public CommitmentValue getCommitmentValue() {
+    public Commitment getCommitment() {
         return commitmentValue;
     }
 
-    public void setCommitmentValue(CommitmentValue commitmentValue) {
-        this.commitmentValue = commitmentValue;
-    }
 
     /**
      * The representation of this object. Used for serialization
@@ -68,11 +67,11 @@ class DamgardAnnouncement implements Announcement {
 
         DamgardAnnouncement that = (DamgardAnnouncement) o;
 
-        return getCommitmentValue() != null ? getCommitmentValue().equals(that.getCommitmentValue()) : that.getCommitmentValue() == null;
+        return getCommitment() != null ? getCommitment().equals(that.getCommitment()) : that.getCommitment() == null;
     }
 
     @Override
     public int hashCode() {
-        return getCommitmentValue() != null ? getCommitmentValue().hashCode() : 0;
+        return getCommitment() != null ? getCommitment().hashCode() : 0;
     }
 }

@@ -1,7 +1,5 @@
 package de.upb.crypto.clarc.protocols;
 
-import java.util.List;
-
 /**
  * An interactive protocol between two parties.
  */

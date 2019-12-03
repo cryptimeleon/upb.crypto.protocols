@@ -2,7 +2,6 @@ package de.upb.crypto.clarc.protocols.fiatshamir;
 
 import de.upb.crypto.clarc.protocols.arguments.InteractiveThreeWayAoK;
 import de.upb.crypto.clarc.protocols.arguments.SigmaProtocol;
-import de.upb.crypto.clarc.protocols.fiatshamirtechnique.FiatShamirHeuristic;
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.Proof;
 import de.upb.crypto.clarc.protocols.fiatshamirtechnique.impl.FiatShamirProof;
 import de.upb.crypto.clarc.protocols.generalizedschnorrprotocol.GenSchnorrTestdataProvider;

@@ -3,7 +3,10 @@ package de.upb.crypto.clarc.protocols.damgardtechnique;
 import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.craco.commitment.interfaces.OpenValue;
+import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
 import de.upb.crypto.math.serialization.*;
+import de.upb.crypto.math.serialization.annotations.v2.ReprUtil;
+import de.upb.crypto.math.serialization.annotations.v2.Represented;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,91 +18,50 @@ import java.util.stream.Collectors;
  */
 class DamgardResponse implements Response {
 
-    private Response[] responses;
-    private Announcement[] announcements;
-    private OpenValue d;
+    private Response innerResponse;
+    private Announcement innerAnnouncement;
+    private OpenValue openValue;
 
     /**
      * Constructor for a DamgardResponse
      *
-     * @param announcements uncommited, original announcement of Darmgard's Technique
-     * @param responses     responce for given challenge
-     * @param d             openvalue for committed announcement
+     * @param innerResponse response of the original protocol
+     * @param innerAnnouncement     uncommitted, original announcement of inner protocol
+     * @param openValue             openvalue for committed announcement
      */
-    public DamgardResponse(Announcement[] announcements, Response[] responses, OpenValue d) {
-        this.responses = responses;
-        this.announcements = announcements;
-        this.d = d;
+    public DamgardResponse(Response innerResponse, Announcement innerAnnouncement, OpenValue openValue) {
+        this.innerResponse = innerResponse;
+        this.innerAnnouncement = innerAnnouncement;
+        this.openValue = openValue;
     }
 
-    public Response[] getResponses() {
-        return responses;
+    public Response getInnerResponse() {
+        return innerResponse;
     }
 
-    public void setResponses(Response[] responses) {
-        this.responses = responses;
+    public Announcement getInnerAnnouncement() {
+        return innerAnnouncement;
     }
 
-    public Announcement[] getAnnouncements() {
-        return announcements;
+    public OpenValue getOpenValue() {
+        return openValue;
     }
 
-    public void setAnnouncements(Announcement[] announcements) {
-        this.announcements = announcements;
-    }
-
-    public OpenValue getD() {
-        return d;
-    }
-
-    public void setD(OpenValue d) {
-        this.d = d;
-    }
-
-
-    /**
-     * The representation of this object. Used for serialization
-     *
-     * @return a Representation or null if the representedTypeName suffices to instantiate an equal object again
-     * @see Representation
-     */
     @Override
     public Representation getRepresentation() {
-        ObjectRepresentation representation = new ObjectRepresentation();
-
-        List<Representation> representationOfAnnouncements = Arrays.stream(this.announcements)
-                .map(Representable::getRepresentation)
-                .collect(Collectors.toList());
-        representation.put("announcements", new ListRepresentation(representationOfAnnouncements));
-
-        List<Representation> representationOfResponses = Arrays.stream(this.responses)
-                .map(Representable::getRepresentation)
-                .collect(Collectors.toList());
-        representation.put("responses", new ListRepresentation(representationOfResponses));
-
-        representation.put("d", new RepresentableRepresentation(d));
-        return representation;
+        ObjectRepresentation repr = new ObjectRepresentation();
+        repr.put("innerResponse", innerResponse.getRepresentation());
+        repr.put("innerAnnouncement", innerAnnouncement.getRepresentation());
+        repr.put("openValue", openValue.getRepresentation());
+        return repr; //restorer code in DamgardTechnique
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DamgardResponse that = (DamgardResponse) o;
-
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(responses, that.responses)) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(announcements, that.announcements)) return false;
-        return d != null ? d.equals(that.d) : that.d == null;
-    }
 
     @Override
-    public int hashCode() {
-        int result = Arrays.hashCode(responses);
-        result = 31 * result + Arrays.hashCode(announcements);
-        result = 31 * result + (d != null ? d.hashCode() : 0);
-        return result;
+    public ByteAccumulator updateAccumulator(ByteAccumulator byteAccumulator) {
+        byteAccumulator.escapeAndSeparate(innerResponse);
+        byteAccumulator.escapeAndSeparate(innerAnnouncement);
+        byteAccumulator.escapeAndAppend(openValue);
+        return byteAccumulator;
     }
 }

@@ -189,11 +189,6 @@ public class SchnorrProtocol implements SigmaProtocol { //TODO handle precomputa
     }
 
     @Override
-    public boolean checkTranscript(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response) {
-        return getTranscriptCheckExpression(commonInput, announcement, challenge, response).evaluate();
-    }
-
-    @Override
     public BooleanExpression getTranscriptCheckExpression(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response) {
         return getTranscriptCheckExpression(getEffectiveHomomorphicPart((SchnorrCommonInput) commonInput),
                 getEffectiveConstantPart((SchnorrCommonInput) commonInput),

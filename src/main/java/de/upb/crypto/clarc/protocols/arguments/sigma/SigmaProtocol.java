@@ -15,7 +15,9 @@ public interface SigmaProtocol extends InteractiveArgument, RepresentationRestor
     Announcement generateAnnouncement(CommonInput commonInput, SecretInput secretInput, AnnouncementSecret announcementSecret);
     Challenge generateChallenge(CommonInput commonInput);
     Response generateResponse(CommonInput commonInput, SecretInput secretInput, Announcement announcement, AnnouncementSecret announcementSecret, Challenge challenge);
-    boolean checkTranscript(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response);
+    default boolean checkTranscript(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response) {
+        return getTranscriptCheckExpression(commonInput, announcement, challenge, response).evaluate();
+    }
     default boolean checkTranscript(CommonInput commonInput, SigmaProtocolTranscript transcript) {
         return checkTranscript(commonInput, transcript.getAnnouncement(), transcript.getChallenge(), transcript.getResponse());
     }
