@@ -63,7 +63,7 @@ public class DlogRepresentationStatement extends SchnorrStatement {
     }
 
     @Override
-    public Announcement simulateAnnouncement(SchnorrInput commonInput) {
+    public Announcement simulateInternalAnnouncement(SchnorrInput commonInput) {
         return new EmptyAnnouncement();
     }
 

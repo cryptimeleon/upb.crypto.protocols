@@ -8,17 +8,11 @@ import de.upb.crypto.math.expressions.exponent.ExponentVariableExpr;
  * Statements shall use InternalExponentVariableExpr for Schnorr witnesses/variables that are private to that statement.
  */
 public class InternalExponentVariableExpr extends ExponentVariableExpr {
-    protected String statement;
     protected SchnorrVariable var;
 
-    public InternalExponentVariableExpr(SchnorrVariable var, String statement) {
+    public InternalExponentVariableExpr(SchnorrVariable var) {
         super(var.getName());
-        this.statement = statement;
         this.var = var;
-    }
-
-    public String getStatement() {
-        return statement;
     }
 
     public SchnorrVariable getVariable() {

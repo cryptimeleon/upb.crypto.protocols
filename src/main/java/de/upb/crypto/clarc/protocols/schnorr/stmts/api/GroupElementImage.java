@@ -13,6 +13,7 @@ import de.upb.crypto.math.serialization.ListRepresentation;
 import de.upb.crypto.math.serialization.Representation;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 public class GroupElementImage implements SchnorrImage {
     protected GroupElementExpression[] groupElems;
@@ -90,5 +91,13 @@ public class GroupElementImage implements SchnorrImage {
 
         for (int i=0;i< groupElems.length;i++)
             results[i] = groupElems[i].evaluateAsync();
+    }
+
+    @Override
+    public String toString() {
+        compute();
+        return "GroupElementImage{" +
+                ", results=" + Arrays.toString(Arrays.stream(results).map(FutureGroupElement::get).toArray()) +
+                '}';
     }
 }

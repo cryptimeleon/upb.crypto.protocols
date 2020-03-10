@@ -44,7 +44,7 @@ public abstract class SchnorrStatement {
     public abstract AnnouncementSecret generateInternalAnnouncementSecret(SchnorrInput commonInput, SchnorrInput secretInput);
     public abstract Announcement generateInternalAnnouncement(SchnorrInput commonInput, SchnorrInput secretInput, AnnouncementSecret announcementSecret);
     public abstract Announcement recreateInternalAnnouncement(SchnorrInput commonInput, Representation repr);
-    public abstract Announcement simulateAnnouncement(SchnorrInput commonInput);
+    public abstract Announcement simulateInternalAnnouncement(SchnorrInput commonInput);
 
     public abstract SchnorrImage recreateImage(SchnorrInput commonInput, Representation repr);
 
