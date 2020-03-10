@@ -10,7 +10,7 @@ import de.upb.crypto.math.serialization.annotations.v2.RepresentationRestorer;
 
 import java.lang.reflect.Type;
 
-public interface SigmaProtocol extends InteractiveArgument, RepresentationRestorer {
+public interface SigmaProtocol extends InteractiveArgument {
     AnnouncementSecret generateAnnouncementSecret(CommonInput commonInput, SecretInput secretInput);
     Announcement generateAnnouncement(CommonInput commonInput, SecretInput secretInput, AnnouncementSecret announcementSecret);
     Challenge generateChallenge(CommonInput commonInput);
@@ -28,28 +28,11 @@ public interface SigmaProtocol extends InteractiveArgument, RepresentationRestor
 
     SpecialHonestVerifierZkSimulator getSimulator();
 
-    Announcement recreateAnnouncement(Representation repr);
-    Challenge recreateChallenge(Representation repr);
-    Response recreateResponse(Representation repr);
-    default SigmaProtocolTranscript recreateTranscript(Representation repr) {
-        return new SigmaProtocolTranscript(this, repr);
-    }
-
-    @Override
-    default Object recreateFromRepresentation(Type type, Representation representation) {
-        if (!(type instanceof Class))
-            throw new IllegalArgumentException("Cannot recreate "+type.getTypeName());
-
-        if (Announcement.class.isAssignableFrom((Class) type))
-            return recreateAnnouncement(representation);
-        if (Challenge.class.isAssignableFrom((Class) type))
-            return recreateChallenge(representation);
-        if (Response.class.isAssignableFrom((Class) type))
-            return recreateResponse(representation);
-        if (SigmaProtocolTranscript.class.isAssignableFrom((Class) type))
-            return recreateTranscript(representation);
-
-        throw new IllegalArgumentException("Cannot recreate "+type.getTypeName());
+    Announcement recreateAnnouncement(Representation repr, CommonInput commonInput);
+    Challenge recreateChallenge(Representation repr, CommonInput commonInput);
+    Response recreateResponse(Representation repr, CommonInput commonInput);
+    default SigmaProtocolTranscript recreateTranscript(Representation repr, CommonInput commonInput) {
+        return new SigmaProtocolTranscript(this, commonInput, repr);
     }
 
     @Override
@@ -61,5 +44,13 @@ public interface SigmaProtocol extends InteractiveArgument, RepresentationRestor
     default InteractiveArgumentInstance instantiateProtocol(String role, CommonInput commonInput, SecretInput secretInput) {
         return PROVER_ROLE.equals(role) ? new SigmaProtocolProverInstance(this, commonInput, secretInput) :
                 VERIFIER_ROLE.equals(role) ? new SigmaProtocolVerifierInstance(this, commonInput) : null;
+    }
+
+    default SigmaProtocolProverInstance getProverInstance(CommonInput commonInput, SecretInput secretInput) {
+        return new SigmaProtocolProverInstance(this, commonInput, secretInput);
+    }
+
+    default SigmaProtocolVerifierInstance getVerifierInstance(CommonInput commonInput) {
+        return new SigmaProtocolVerifierInstance(this, commonInput);
     }
 }

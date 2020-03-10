@@ -9,7 +9,6 @@ import de.upb.crypto.math.serialization.annotations.v2.Represented;
 import java.math.BigInteger;
 
 public class SchnorrChallenge implements Challenge {
-    @Represented
     protected BigInteger challenge;
 
     public SchnorrChallenge(Representation repr) {

@@ -1,8 +1,8 @@
 package de.upb.crypto.clarc.protocols.serialization;
 
-import de.upb.crypto.clarc.protocols.serialization.classes.*;
 import de.upb.crypto.clarc.utils.GenericStandaloneTest;
 import de.upb.crypto.clarc.utils.StandaloneTestParams;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Disabled
 class ProtocolsStandaloneTest extends GenericStandaloneTest {
 
     @Override
@@ -21,11 +22,10 @@ class ProtocolsStandaloneTest extends GenericStandaloneTest {
     protected Collection<StandaloneTestParams> getStandaloneClasses() {
         ArrayList<StandaloneTestParams> toReturn = new ArrayList<>();
 
-        toReturn.addAll(ExpressionsParams.get());
-        toReturn.addAll(ParameterParams.get());
+        /*toReturn.addAll(ParameterParams.get());
         toReturn.addAll(GeneralizedSchnorrParams.get());
         toReturn.addAll(DamgardParams.get());
-        toReturn.addAll(FiatShamirParams.get());
+        toReturn.addAll(FiatShamirParams.get());*/
         return toReturn;
     }
 

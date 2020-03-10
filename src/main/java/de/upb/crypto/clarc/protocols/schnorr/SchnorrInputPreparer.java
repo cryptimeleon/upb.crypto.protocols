@@ -1,5 +1,6 @@
 package de.upb.crypto.clarc.protocols.schnorr;
 
+import de.upb.crypto.math.expressions.VariableExpression;
 import de.upb.crypto.math.expressions.bool.ExponentEqualityExpr;
 import de.upb.crypto.math.expressions.bool.GroupEqualityExpr;
 import de.upb.crypto.math.expressions.exponent.*;
@@ -45,7 +46,7 @@ public class SchnorrInputPreparer {
         }
 
         if (expr instanceof GroupPowExpr) {
-            if (((GroupPowExpr) expr).getExponent().getVariables().stream().anyMatch(isWitness)) { //exponent contains a witness, all this needs to be on homomorphic side
+            if (((GroupPowExpr) expr).getExponent().getVariables().stream().map(VariableExpression::getName).anyMatch(isWitness)) { //exponent contains a witness, all this needs to be on homomorphic side
                 if (!isExponentAffineLinear(((GroupPowExpr) expr).getExponent(), isWitness))
                     throw new IllegalArgumentException("Cannot handle nonlinear exponent");
                 return new GroupElementExpression[]{expr, new GroupEmptyExpr(expr.getGroup())};
@@ -72,7 +73,7 @@ public class SchnorrInputPreparer {
         }
 
         //That's all we were able to do. If this expression is of some other type, that's fine as long as it's a constant.
-        if (expr.getVariables().stream().noneMatch(isWitness)) {
+        if (expr.getVariables().stream().map(VariableExpression::getName).noneMatch(isWitness)) {
             return new GroupElementExpression[] {new GroupEmptyExpr(expr.getGroup()), expr};
         }
 
@@ -117,6 +118,6 @@ public class SchnorrInputPreparer {
     public static boolean isExponentConstant(ExponentExpr expr, Predicate<String> isWitnesss) {
         if (expr instanceof ExponentEmptyExpr)
             return true;
-        return expr.getVariables().stream().noneMatch(isWitnesss); //TODO this check may be somewhat inefficient.
+        return expr.getVariables().stream().map(VariableExpression::getName).noneMatch(isWitnesss); //TODO this check may be somewhat inefficient.
     }
 }

@@ -1,5 +1,6 @@
 package de.upb.crypto.clarc.protocols.arguments.sigma;
 
+import de.upb.crypto.clarc.protocols.CommonInput;
 import de.upb.crypto.math.serialization.Representable;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.v2.ReprUtil;
@@ -11,11 +12,11 @@ import de.upb.crypto.math.serialization.annotations.v2.Represented;
  * challenge from the Verifier to the Prover.
  */
 public class SigmaProtocolTranscript implements Representable {
-    @Represented(restorer = "protocol")
+    @Represented(restorer = "a")
     protected Announcement announcement;
-    @Represented(restorer = "protocol")
+    @Represented(restorer = "c")
     protected Challenge challenge;
-    @Represented(restorer = "protocol")
+    @Represented(restorer = "r")
     protected Response response;
 
     public SigmaProtocolTranscript(Announcement announcement, Challenge challenge, Response response) {
@@ -24,8 +25,12 @@ public class SigmaProtocolTranscript implements Representable {
         this.response = response;
     }
 
-    public SigmaProtocolTranscript(SigmaProtocol protocol, Representation repr) {
-        new ReprUtil(this).register(protocol, "protocol").deserialize(repr);
+    public SigmaProtocolTranscript(SigmaProtocol protocol, CommonInput commonInput, Representation repr) {
+        new ReprUtil(this)
+                .register(a -> protocol.recreateAnnouncement(a, commonInput), "a")
+                .register(c -> protocol.recreateChallenge(c, commonInput), "c")
+                .register(r -> protocol.recreateResponse(r, commonInput), "r")
+                .deserialize(repr);
     }
 
     public Announcement getAnnouncement() {

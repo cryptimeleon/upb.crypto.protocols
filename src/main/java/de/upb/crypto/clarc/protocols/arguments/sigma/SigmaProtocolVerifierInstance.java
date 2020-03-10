@@ -6,9 +6,9 @@ import de.upb.crypto.math.expressions.bool.BooleanExpression;
 import de.upb.crypto.math.serialization.Representation;
 
 public class SigmaProtocolVerifierInstance extends SigmaProtocolInstance {
-    protected State state;
+    protected State state = State.NOTHING;
 
-    protected enum State {
+    enum State {
         NOTHING,
         SENT_CHALLENGE,
         RECEIVED_RESPONSE
@@ -27,12 +27,12 @@ public class SigmaProtocolVerifierInstance extends SigmaProtocolInstance {
     public Representation nextMessage(Representation received) {
         switch (state) {
             case NOTHING: //receiving announcement
-                announcement = protocol.recreateAnnouncement(received);
+                announcement = protocol.recreateAnnouncement(received, commonInput);
                 challenge = protocol.generateChallenge(commonInput);
                 state = State.SENT_CHALLENGE;
-                return announcement.getRepresentation();
+                return challenge.getRepresentation();
             case SENT_CHALLENGE: //receiving response
-                response = protocol.recreateResponse(received);
+                response = protocol.recreateResponse(received, commonInput);
                 state = State.RECEIVED_RESPONSE;
                 return null; //done
             case RECEIVED_RESPONSE:

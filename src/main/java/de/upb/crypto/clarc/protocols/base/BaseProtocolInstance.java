@@ -106,4 +106,9 @@ public abstract class BaseProtocolInstance implements TwoPartyProtocolInstance {
     public boolean hasTerminated() {
         return this.highLevelWantsTerminate && runningSubprotocolInstances.isEmpty();
     }
+
+    @Override
+    public String getRoleName() {
+        return role;
+    }
 }
