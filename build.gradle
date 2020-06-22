@@ -1,7 +1,6 @@
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
-    id 'maven'
     id 'maven-publish'
 }
 
@@ -62,8 +61,7 @@ test {
 
 //packaging tests
 task packageTests(type: Jar) {
-    classifier = 'tests'
-    baseName = project.name + '-test'
+    archiveClassifier = 'tests'
     from sourceSets.test.output+sourceSets.test.allSource
 }
 
