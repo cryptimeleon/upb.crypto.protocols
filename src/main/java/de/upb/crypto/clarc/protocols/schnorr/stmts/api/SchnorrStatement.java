@@ -10,6 +10,7 @@ import de.upb.crypto.math.serialization.Representation;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A statement provable with the Schnorr protocol.
@@ -41,6 +42,10 @@ public abstract class SchnorrStatement {
     public abstract Collection<SchnorrVariable> getWitnesses(SchnorrInput commonInput);
     public abstract SchnorrVariableValue getInternalWitnessValue(SchnorrInput commonInput, SchnorrInput secretInput, Announcement internalAnnouncement, AnnouncementSecret announcementSecret, SchnorrVariable variable);
 
+    /**
+     * Generate whatever secret information you want. This will be passed to you in future calls.
+     * Usually, statements will want to make some random choices for their internalAnnouncement.
+     */
     public abstract AnnouncementSecret generateInternalAnnouncementSecret(SchnorrInput commonInput, SchnorrInput secretInput);
     public abstract Announcement generateInternalAnnouncement(SchnorrInput commonInput, SchnorrInput secretInput, AnnouncementSecret announcementSecret);
     public abstract Announcement recreateInternalAnnouncement(SchnorrInput commonInput, Representation repr);
@@ -58,4 +63,24 @@ public abstract class SchnorrStatement {
      * @return a number s.t. the challenge space should be [0,thisNumber-1].
      */
     public abstract BigInteger getChallengeSpaceSize(SchnorrInput commonInput);
+
+    @Override
+    public String toString() {
+        return "SchnorrStatement{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SchnorrStatement that = (SchnorrStatement) o;
+        return name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }

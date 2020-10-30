@@ -103,6 +103,27 @@ public class SchnorrProtocol implements SigmaProtocol {
         return expr;
     }
 
+    public SchnorrImage applyHomomorphismOnWitness(CommonInput commonInput, SecretInput secretInput, Announcement announcement, AnnouncementSecret announcementSecret, SchnorrStatement stmt) {
+        SchnorrPreimage preimage = getEffectiveWitness(commonInput, secretInput, announcement, announcementSecret);
+        return stmt.evaluateHomomorphism((SchnorrInput) commonInput, ((SchnorrAnnouncement) announcement).getInternalAnnouncement(stmt.getName()), preimage);
+    }
+
+    public SchnorrPreimage getEffectiveWitness(CommonInput commonInput, SecretInput secretInput, Announcement announcement, AnnouncementSecret announcementSecret) {
+        HashMap<SchnorrVariable, SchnorrVariableValue> values = new HashMap<>();
+        for (SchnorrVariable variable : getEffectivePreimageSpace(commonInput)) {
+            SchnorrVariableValue witness;
+            if (variable.isInternalVariable()) {
+                SchnorrStatement statement = variable.getStatement();
+                Announcement internalAnnouncement = ((SchnorrAnnouncement) announcement).getInternalAnnouncement(statement.getName());
+                AnnouncementSecret internalAnnouncementSecret = ((SchnorrAnnouncementSecret) announcementSecret).getStatementAnnouncementSecret(statement.getName());
+                witness = variable.getStatement().getInternalWitnessValue((SchnorrInput) commonInput, (SchnorrInput) secretInput, internalAnnouncement, internalAnnouncementSecret, variable);
+            } else
+                witness = variable.instantiateFromInput((SchnorrInput) secretInput);
+            values.put(variable, witness);
+        }
+        return new SchnorrPreimage(values);
+    }
+
     @Override
     public SpecialHonestVerifierZkSimulator getSimulator() {
         return new SchnorrSimulator(this);

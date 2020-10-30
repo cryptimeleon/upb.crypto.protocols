@@ -5,12 +5,12 @@ import de.upb.crypto.math.expressions.exponent.ExponentVariableExpr;
 
 /**
  * In the Schnorr context, ExponentVariableExpr are user-given.
- * Statements shall use InternalExponentVariableExpr for Schnorr witnesses/variables that are private to that statement.
+ * Statements shall use InternalSchnorrExponentVariableExpr for Schnorr witnesses/variables that are private to that statement.
  */
-public class InternalExponentVariableExpr extends ExponentVariableExpr {
+public class InternalSchnorrExponentVariableExpr extends ExponentVariableExpr {
     protected SchnorrVariable var;
 
-    public InternalExponentVariableExpr(SchnorrVariable var) {
+    public InternalSchnorrExponentVariableExpr(SchnorrVariable var) {
         super(var.getName());
         this.var = var;
     }

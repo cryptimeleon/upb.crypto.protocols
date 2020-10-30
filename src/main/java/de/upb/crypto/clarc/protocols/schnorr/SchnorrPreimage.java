@@ -1,8 +1,8 @@
 package de.upb.crypto.clarc.protocols.schnorr;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
-import de.upb.crypto.clarc.protocols.schnorr.expr.InternalExponentVariableExpr;
-import de.upb.crypto.clarc.protocols.schnorr.expr.InternalGroupVariableExpr;
+import de.upb.crypto.clarc.protocols.schnorr.expr.InternalSchnorrExponentVariableExpr;
+import de.upb.crypto.clarc.protocols.schnorr.expr.InternalSchnorrGroupVariableExpr;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.SchnorrGroupElemVariable;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.SchnorrVariable;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.SchnorrVariableValue;
@@ -56,10 +56,10 @@ public class SchnorrPreimage implements Response, Substitutions {
 
     @Override
     public Expression getSubstitution(VariableExpression variable) {
-        if (variable instanceof InternalExponentVariableExpr)
-            return variableValues.get(((InternalExponentVariableExpr) variable).getVariable()).asExpression();
-        if (variable instanceof InternalGroupVariableExpr)
-            return variableValues.get(((InternalGroupVariableExpr) variable).getVariable()).asExpression();
+        if (variable instanceof InternalSchnorrExponentVariableExpr)
+            return variableValues.get(((InternalSchnorrExponentVariableExpr) variable).getVariable()).asExpression();
+        if (variable instanceof InternalSchnorrGroupVariableExpr)
+            return variableValues.get(((InternalSchnorrGroupVariableExpr) variable).getVariable()).asExpression();
 
         if (variable instanceof ExponentVariableExpr) {
             for (SchnorrVariable knownVar : variableValues.keySet())

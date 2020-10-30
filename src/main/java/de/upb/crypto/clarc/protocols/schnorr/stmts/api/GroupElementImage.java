@@ -23,7 +23,7 @@ public class GroupElementImage implements SchnorrImage {
         this.groupElems = groupElems;
     }
 
-    public GroupElementImage(Representation repr, Group[] groups) {
+    public GroupElementImage(Representation repr, Group... groups) {
         groupElems = new GroupElementExpression[groups.length];
         for (int i=0;i<groupElems.length;i++)
             groupElems[i] = groups[i].getElement(repr.list().get(i)).expr();

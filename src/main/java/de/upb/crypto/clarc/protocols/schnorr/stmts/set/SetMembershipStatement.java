@@ -5,8 +5,8 @@ import de.upb.crypto.clarc.protocols.arguments.sigma.AnnouncementSecret;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrImage;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrPreimage;
-import de.upb.crypto.clarc.protocols.schnorr.expr.InternalExponentVariableExpr;
-import de.upb.crypto.clarc.protocols.schnorr.expr.InternalGroupVariableExpr;
+import de.upb.crypto.clarc.protocols.schnorr.expr.InternalSchnorrExponentVariableExpr;
+import de.upb.crypto.clarc.protocols.schnorr.expr.InternalSchnorrGroupVariableExpr;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.*;
 import de.upb.crypto.math.expressions.group.GroupElementExpression;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
@@ -20,24 +20,24 @@ import java.util.Collection;
 
 public class SetMembershipStatement extends SchnorrStatement {
     protected SetMembershipPublicParameters pp;
-    SchnorrZnVariable member;
-    SchnorrZnVariable r;
-    SchnorrGroupElemVariable blindedSignature;
-    GroupElementExpression homomorphicPart;
-    GroupElementExpression homomorphismTarget;
+    protected SchnorrZnVariable member;
+    protected SchnorrZnVariable r;
+    protected SchnorrGroupElemVariable blindedSignature;
+    protected GroupElementExpression homomorphicPart;
+    protected GroupElementExpression homomorphismTarget;
 
     public SetMembershipStatement(String name, SetMembershipPublicParameters pp, String memberName) {
         super(name);
         this.pp = pp;
         this.member = new SchnorrZnVariable(memberName, pp.getZn());
         this.r = new SchnorrZnVariable("r", pp.getZn(), this);
-        this.blindedSignature = new SchnorrGroupElemVariable("blindedSignature", pp.g1.getStructure());
+        this.blindedSignature = new SchnorrGroupElemVariable("blindedSignature", pp.g1.getStructure(), this);
         homomorphicPart = pp.bilinearGroup.getBilinearMap().expr(
-                    new InternalGroupVariableExpr(blindedSignature),
+                    new InternalSchnorrGroupVariableExpr(blindedSignature),
                     pp.g2.expr().pow(member.getName())
-                ).op(pp.bilinearGroup.getBilinearMap().expr(pp.g1, pp.g2).pow(new InternalExponentVariableExpr(r).negate()));
+                ).op(pp.bilinearGroup.getBilinearMap().expr(pp.g1, pp.g2).pow(new InternalSchnorrExponentVariableExpr(r).negate()));
         homomorphismTarget = pp.bilinearGroup.getBilinearMap().expr(
-                new InternalGroupVariableExpr(blindedSignature),
+                new InternalSchnorrGroupVariableExpr(blindedSignature),
                 pp.pk.expr()
         ).inv();
     }
@@ -92,7 +92,7 @@ public class SetMembershipStatement extends SchnorrStatement {
     }
 
     protected GroupElementExpression substituteBlindedSignature(GroupElementExpression e, Announcement internalAnnouncement) {
-        return e.substitute(expr -> expr instanceof InternalGroupVariableExpr && ((InternalGroupVariableExpr) expr).getVariable().equals(blindedSignature) ? ((SetMembershipAnnouncement) internalAnnouncement).blindedSig.expr() : null);
+        return e.substitute(expr -> expr instanceof InternalSchnorrGroupVariableExpr && ((InternalSchnorrGroupVariableExpr) expr).getVariable().equals(blindedSignature) ? ((SetMembershipAnnouncement) internalAnnouncement).blindedSig.expr() : null);
     }
 
     @Override

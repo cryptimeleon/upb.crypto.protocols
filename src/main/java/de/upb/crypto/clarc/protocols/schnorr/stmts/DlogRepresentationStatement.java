@@ -9,6 +9,7 @@ import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrPreimage;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.*;
 import de.upb.crypto.math.expressions.exponent.ExponentVariableExpr;
+import de.upb.crypto.math.expressions.group.GroupElementConstantExpr;
 import de.upb.crypto.math.expressions.group.GroupElementExpression;
 import de.upb.crypto.math.interfaces.structures.Group;
 import de.upb.crypto.math.serialization.Representation;
@@ -25,10 +26,14 @@ public class DlogRepresentationStatement extends SchnorrStatement {
         this.group = constantPart.getGroup();
         if (this.group == null)
             this.group = homomorphicPart.getGroup();
-        if (this.group.size() == null || !this.group.size().isProbablePrime(20))
-            throw new IllegalArgumentException("Need prime order group.");
+        if (this.group.size() == null)
+            throw new IllegalArgumentException("Need finite known order group.");
         this.homomorphicPart = homomorphicPart;
         this.constantPart = constantPart;
+    }
+
+    public DlogRepresentationStatement(String name, GroupElementExpression homomorphicPart) {
+        this(name, homomorphicPart, new GroupElementConstantExpr(homomorphicPart.getGroup().getNeutralElement()));
     }
 
     @Override
@@ -44,7 +49,7 @@ public class DlogRepresentationStatement extends SchnorrStatement {
 
     @Override
     public SchnorrVariableValue getInternalWitnessValue(SchnorrInput commonInput, SchnorrInput secretInput, Announcement internalAnnouncement, AnnouncementSecret announcementSecret, SchnorrVariable variable) {
-        throw new IllegalArgumentException("DlogRepresentationStatement does not have any internal witnesses"); //this call should never happen.
+        throw new IllegalArgumentException("This does not have any internal witnesses"); //this call should never happen.
     }
 
     @Override
