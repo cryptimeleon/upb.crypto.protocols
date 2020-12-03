@@ -12,7 +12,7 @@ import java.util.HashMap;
  * Additionally, optionally, each statement of the Schnorr proof can have private input.
  */
 public class SchnorrInput extends ValueBundle implements CommonInput, SecretInput {
-    private HashMap<String, SchnorrStatementInput> privateStatementInput = new HashMap<>();
+    private final HashMap<String, SchnorrStatementInput> privateStatementInput = new HashMap<>();
 
     public void putPrivateStatementInput(String statementName, SchnorrStatementInput input) {
         privateStatementInput.put(statementName, input);

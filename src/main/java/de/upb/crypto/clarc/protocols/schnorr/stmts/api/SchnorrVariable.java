@@ -2,6 +2,11 @@ package de.upb.crypto.clarc.protocols.schnorr.stmts.api;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
+import de.upb.crypto.math.expressions.VariableExpression;
+import de.upb.crypto.math.expressions.exponent.ExponentVariableExpr;
+import de.upb.crypto.math.hash.impl.ByteArrayAccumulator;
+import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
+import de.upb.crypto.math.interfaces.hash.UniqueByteRepresentable;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.v2.RepresentationRestorer;
 
@@ -13,18 +18,16 @@ import java.util.Objects;
  * Each SchnorrStatement is a homomorphism over these variables.
  * This is only the (static) variable. SchnorrVariableValue represents a concrete value.
  */
-public abstract class SchnorrVariable implements RepresentationRestorer {
-    protected final String name;
+public abstract class SchnorrVariable implements RepresentationRestorer, Comparable<SchnorrVariable>, UniqueByteRepresentable {
+    protected final VariableExpression name;
     protected final SchnorrStatement privateToStatement; //null if public variable.
 
-    public SchnorrVariable(String name, SchnorrStatement privateToStatement) {
-        if (name == null || name.isEmpty())
-            throw new IllegalArgumentException("Name must not be empty");
+    public SchnorrVariable(VariableExpression name, SchnorrStatement privateToStatement) {
         this.name = name;
         this.privateToStatement = privateToStatement;
     }
 
-    public SchnorrVariable(String name) {
+    public SchnorrVariable(VariableExpression name) {
         this(name, null);
     }
 
@@ -32,16 +35,12 @@ public abstract class SchnorrVariable implements RepresentationRestorer {
     public abstract SchnorrVariableValue recreateValue(Representation repr);
     public abstract SchnorrVariableValue instantiateFromInput(SchnorrInput input);
 
-    public String getName() {
+    public VariableExpression getVariableExpr() {
         return name;
     }
 
     public SchnorrStatement getStatement() {
         return privateToStatement;
-    }
-
-    public String getScopeString() {
-        return isInternalVariable() ? getStatement().getName() : "";
     }
 
     public boolean isInternalVariable() {
@@ -71,5 +70,24 @@ public abstract class SchnorrVariable implements RepresentationRestorer {
     @Override
     public int hashCode() {
         return Objects.hash(name, privateToStatement);
+    }
+
+    @Override
+    public int compareTo(SchnorrVariable other) {
+        ByteArrayAccumulator thisAcc = new ByteArrayAccumulator();
+        this.updateAccumulator(thisAcc);
+        ByteArrayAccumulator otherAcc = new ByteArrayAccumulator();
+        other.updateAccumulator(otherAcc);
+
+        return thisAcc.compareTo(otherAcc);
+    }
+
+    @Override
+    public ByteAccumulator updateAccumulator(ByteAccumulator acc) {
+        acc.escapeAndSeparate(acc.getClass().getName());
+        acc.escapeAndSeparate(privateToStatement.getName());
+        acc.append(name);
+
+        return acc;
     }
 }

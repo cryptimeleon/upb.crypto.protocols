@@ -1,18 +1,20 @@
 package de.upb.crypto.clarc.protocols.schnorr.stmts.api;
 
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
+import de.upb.crypto.math.expressions.VariableExpression;
+import de.upb.crypto.math.expressions.group.GroupVariableExpr;
 import de.upb.crypto.math.interfaces.structures.Group;
 import de.upb.crypto.math.serialization.Representation;
 
 public class SchnorrGroupElemVariable extends SchnorrVariable {
     protected Group group;
 
-    public SchnorrGroupElemVariable(String name, Group group, SchnorrStatement privateToStatement) {
+    public SchnorrGroupElemVariable(VariableExpression name, Group group, SchnorrStatement privateToStatement) {
         super(name, privateToStatement);
         this.group = group;
     }
 
-    public SchnorrGroupElemVariable(String name, Group group) {
+    public SchnorrGroupElemVariable(VariableExpression name, Group group) {
         this(name, group, null);
     }
 
@@ -22,13 +24,18 @@ public class SchnorrGroupElemVariable extends SchnorrVariable {
     }
 
     @Override
+    public GroupVariableExpr getVariableExpr() {
+        return (GroupVariableExpr) super.getVariableExpr();
+    }
+
+    @Override
     public SchnorrVariableValue recreateValue(Representation repr) {
         return new SchnorrGroupElemVariableValue(group.getElement(repr), this);
     }
 
     @Override
     public SchnorrVariableValue instantiateFromInput(SchnorrInput input) {
-        return new SchnorrGroupElemVariableValue(input.getGroupElement(getName()), this);
+        return new SchnorrGroupElemVariableValue(input.getGroupElement(getVariableExpr()), this);
     }
 
     @Override

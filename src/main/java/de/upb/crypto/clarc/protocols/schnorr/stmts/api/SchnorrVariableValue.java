@@ -1,6 +1,7 @@
 package de.upb.crypto.clarc.protocols.schnorr.stmts.api;
 
 import de.upb.crypto.math.expressions.Expression;
+import de.upb.crypto.math.expressions.VariableExpression;
 import de.upb.crypto.math.interfaces.hash.UniqueByteRepresentable;
 import de.upb.crypto.math.serialization.Representable;
 
@@ -14,16 +15,13 @@ public interface SchnorrVariableValue extends Representable, UniqueByteRepresent
 
     SchnorrVariable getVariable();
 
-    default String getName() {
-        return getVariable().getName();
+    default VariableExpression getName() {
+        return getVariable().getVariableExpr();
     }
 
     default SchnorrStatement getStatement() {
         return getVariable().getStatement();
     }
 
-    /**
-     * Outputs the value of this variable as an expression (if possible)
-     */
     Expression asExpression();
 }

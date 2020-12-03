@@ -4,7 +4,7 @@ import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.clarc.protocols.arguments.sigma.AnnouncementSecret;
 import de.upb.crypto.clarc.protocols.arguments.sigma.EmptyAnnouncement;
 import de.upb.crypto.clarc.protocols.arguments.sigma.EmptyAnnouncementSecret;
-import de.upb.crypto.clarc.protocols.schnorr.SchnorrImage;
+
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrPreimage;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.*;
@@ -12,6 +12,7 @@ import de.upb.crypto.math.expressions.exponent.ExponentVariableExpr;
 import de.upb.crypto.math.expressions.group.GroupElementConstantExpr;
 import de.upb.crypto.math.expressions.group.GroupElementExpression;
 import de.upb.crypto.math.interfaces.structures.Group;
+import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.Representation;
 
 import java.math.BigInteger;
@@ -41,7 +42,7 @@ public class DlogRepresentationStatement extends SchnorrStatement {
         ArrayList<SchnorrVariable> variables = new ArrayList<>();
         getEffectiveHomomorphicPart(commonInput).getVariables().forEach(v -> {
             if (v instanceof ExponentVariableExpr)
-                variables.add(new SchnorrZnVariable(v.getName(), group.getZn()));
+                variables.add(new SchnorrZnVariable(v, group.getZn()));
         });
 
         return variables;
@@ -73,18 +74,18 @@ public class DlogRepresentationStatement extends SchnorrStatement {
     }
 
     @Override
-    public SchnorrImage recreateImage(SchnorrInput commonInput, Representation repr) {
-        return new GroupElementImage(repr, group);
+    public GroupElement recreateImage(SchnorrInput commonInput, Representation repr) {
+        return group.getElement(repr);
     }
 
     @Override
-    public SchnorrImage getHomomorphismTarget(SchnorrInput commonInput, Announcement internalAnnouncement) {
-        return new GroupElementImage(constantPart.substitute(commonInput));
+    public GroupElement getHomomorphismTarget(SchnorrInput commonInput, Announcement internalAnnouncement) {
+        return getEffectiveConstantPart(commonInput);
     }
 
     @Override
-    public SchnorrImage evaluateHomomorphism(SchnorrInput commonInput, Announcement internalAnnouncement, SchnorrPreimage preimage) {
-        return new GroupElementImage(getEffectiveHomomorphicPart(commonInput).substitute(preimage));
+    public GroupElement evaluateHomomorphism(SchnorrInput commonInput, Announcement internalAnnouncement, SchnorrPreimage preimage) {
+        return getEffectiveHomomorphicPart(commonInput).evaluate(preimage);
     }
 
     @Override
@@ -94,5 +95,9 @@ public class DlogRepresentationStatement extends SchnorrStatement {
 
     protected GroupElementExpression getEffectiveHomomorphicPart(SchnorrInput commonInput) {
         return homomorphicPart.substitute(commonInput);
+    }
+
+    protected GroupElement getEffectiveConstantPart(SchnorrInput commonInput) {
+        return constantPart.evaluate(commonInput);
     }
 }

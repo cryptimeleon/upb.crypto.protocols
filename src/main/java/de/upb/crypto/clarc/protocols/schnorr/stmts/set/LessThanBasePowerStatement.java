@@ -2,11 +2,8 @@ package de.upb.crypto.clarc.protocols.schnorr.stmts.set;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.clarc.protocols.arguments.sigma.AnnouncementSecret;
-import de.upb.crypto.clarc.protocols.schnorr.SchnorrImage;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrPreimage;
-import de.upb.crypto.clarc.protocols.schnorr.expr.InternalSchnorrExponentVariableExpr;
-import de.upb.crypto.clarc.protocols.schnorr.expr.InternalSchnorrGroupVariableExpr;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.*;
 import de.upb.crypto.math.expressions.exponent.ExponentConstantExpr;
 import de.upb.crypto.math.expressions.exponent.ExponentExpr;
@@ -15,31 +12,23 @@ import de.upb.crypto.math.expressions.group.GroupElementExpression;
 import de.upb.crypto.math.hash.annotations.AnnotatedUbrUtil;
 import de.upb.crypto.math.hash.annotations.UniqueByteRepresented;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
-import de.upb.crypto.math.interfaces.structures.FutureGroupElement;
-import de.upb.crypto.math.interfaces.structures.Group;
 import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.ListRepresentation;
 import de.upb.crypto.math.serialization.Representation;
-import de.upb.crypto.math.serialization.annotations.v2.ReprUtil;
-import de.upb.crypto.math.serialization.annotations.v2.Represented;
 import de.upb.crypto.math.structures.integers.IntegerRing;
 import de.upb.crypto.math.structures.zn.Zn;
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class LessThanBasePowerStatement extends SchnorrStatement {
     protected SetMembershipPublicParameters pp;
     protected int base;
     protected int power;
-    protected String shift;
-    protected SchnorrZnVariable smallVariable;
+    protected ExponentExpr smallValue;
 
     protected SchnorrZnVariable[] blindingValue;
     protected SchnorrGroupElemVariable[] blindedSignature;
@@ -50,22 +39,20 @@ public class LessThanBasePowerStatement extends SchnorrStatement {
     protected ExponentExpr homomorphismTargetSumStatement;
 
     /**
-     * Construct a proof that smallVariable lies within the interval [shift, shift + base^power] (beware of mod p overflow).
+     * Construct a proof that smallVariable lies within the interval [0, base^power-1] (beware of mod p overflow).
      */
-    public LessThanBasePowerStatement(String name, int base, int power, String shift, String smallVariable, SetMembershipPublicParameters pp) {
+    public LessThanBasePowerStatement(String name, int base, int power, ExponentExpr smallValue, SetMembershipPublicParameters pp) {
         super(name);
         this.pp = pp;
         this.base = base;
         this.power = power;
+        this.smallValue = smallValue;
 
         if (pp.signatures.keySet().size() != base)
             throw new IllegalArgumentException("pp don't fit");
         for (int i=0; i<base;i++)
             if (!pp.signatures.containsKey(BigInteger.valueOf(i)))
                 throw new IllegalArgumentException("pp don't fit");
-
-        this.smallVariable = new SchnorrZnVariable(smallVariable, pp.getZn());
-        this.shift = shift; //TODO maybe this doesn't have to get a name. Maybe this becomes a SchnorrZnVariable that is private to this. Then it's just a constant that's defined through the commonInput
 
         //Prepare statement
         blindingValue = new SchnorrZnVariable[power];
@@ -105,13 +92,13 @@ public class LessThanBasePowerStatement extends SchnorrStatement {
 
     @Override
     public SchnorrVariableValue getInternalWitnessValue(SchnorrInput commonInput, SchnorrInput secretInput, Announcement internalAnnouncement, AnnouncementSecret announcementSecret, SchnorrVariable variable) {
-        if (variable.getName().startsWith("r")) {
-            int i = Integer.parseInt(variable.getName().substring(1));
+        if (variable.getVariableExpr().startsWith("r")) {
+            int i = Integer.parseInt(variable.getVariableExpr().substring(1));
             return new SchnorrZnVariableValue(((LessThanBasePowerSecret) announcementSecret).blindingValues[i], (SchnorrZnVariable) variable);
         }
 
-        if (variable.getName().startsWith("digit")) {
-            int i = Integer.parseInt(variable.getName().substring(5));
+        if (variable.getVariableExpr().startsWith("digit")) {
+            int i = Integer.parseInt(variable.getVariableExpr().substring(5));
             return new SchnorrZnVariableValue(pp.getZn().valueOf(((LessThanBasePowerSecret) announcementSecret).digits[i]), (SchnorrZnVariable) variable);
         }
 
@@ -120,7 +107,7 @@ public class LessThanBasePowerStatement extends SchnorrStatement {
 
     @Override
     public AnnouncementSecret generateInternalAnnouncementSecret(SchnorrInput commonInput, SchnorrInput secretInput) {
-        BigInteger[] digits = IntegerRing.decomposeIntoDigits(secretInput.getInteger(smallVariable.getName()).subtract(commonInput.getInteger(shift)), BigInteger.valueOf(base), power);
+        BigInteger[] digits = IntegerRing.decomposeIntoDigits(secretInput.getInteger(smallVariable.getVariableExpr()).subtract(commonInput.getInteger(shift)), BigInteger.valueOf(base), power);
         Zn.ZnElement[] blindingSecrets = new Zn.ZnElement[power];
         for (int i=0;i<power;i++)
             blindingSecrets[i] = pp.getZn().getUniformlyRandomUnit(); //TODO check that getZn() is cached. Don't create new objects each time.
@@ -157,17 +144,17 @@ public class LessThanBasePowerStatement extends SchnorrStatement {
     }
 
     @Override
-    public SchnorrImage recreateImage(SchnorrInput commonInput, Representation repr) {
+    public GroupElement recreateImage(SchnorrInput commonInput, Representation repr) {
         return new GroupElementImage(repr, );
     }
 
     @Override
-    public SchnorrImage getHomomorphismTarget(SchnorrInput commonInput, Announcement internalAnnouncement) {
+    public GroupElement getHomomorphismTarget(SchnorrInput commonInput, Announcement internalAnnouncement) {
         return new GroupElementImage(substituteBlindedSignatures(homomorphismTarget, internalAnnouncement));
     }
 
     @Override
-    public SchnorrImage evaluateHomomorphism(SchnorrInput commonInput, Announcement internalAnnouncement, SchnorrPreimage preimage) {
+    public GroupElement evaluateHomomorphism(SchnorrInput commonInput, Announcement internalAnnouncement, SchnorrPreimage preimage) {
         return new GroupElementImage(substituteBlindedSignatures(homomorphicPart, internalAnnouncement).substitute(preimage));
     }
 

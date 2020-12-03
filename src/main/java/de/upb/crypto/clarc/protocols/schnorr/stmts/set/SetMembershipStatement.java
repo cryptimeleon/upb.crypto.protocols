@@ -2,49 +2,48 @@ package de.upb.crypto.clarc.protocols.schnorr.stmts.set;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.clarc.protocols.arguments.sigma.AnnouncementSecret;
-import de.upb.crypto.clarc.protocols.schnorr.SchnorrImage;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrPreimage;
-import de.upb.crypto.clarc.protocols.schnorr.expr.InternalSchnorrExponentVariableExpr;
-import de.upb.crypto.clarc.protocols.schnorr.expr.InternalSchnorrGroupVariableExpr;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.*;
-import de.upb.crypto.math.expressions.group.GroupElementExpression;
+import de.upb.crypto.clarc.protocols.schnorr.stmts.api.expr.InternalZnVariableExpr;
+import de.upb.crypto.math.expressions.VariableExpression;
+import de.upb.crypto.math.expressions.exponent.ExponentExpr;
+import de.upb.crypto.math.expressions.exponent.ExponentVariableExpr;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
 import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.structures.zn.Zn;
 
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 public class SetMembershipStatement extends SchnorrStatement {
     protected SetMembershipPublicParameters pp;
-    protected SchnorrZnVariable member;
+    protected ExponentExpr member;
     protected SchnorrZnVariable r;
-    protected SchnorrGroupElemVariable blindedSignature;
-    protected GroupElementExpression homomorphicPart;
-    protected GroupElementExpression homomorphismTarget;
 
-    public SetMembershipStatement(String name, SetMembershipPublicParameters pp, String memberName) {
+    /**
+     *
+     * @param name
+     * @param pp
+     * @param member the value that's supposed to be in the set. Must be an expression that's linear in the larger protocol's witnesses
+     */
+    public SetMembershipStatement(String name, SetMembershipPublicParameters pp, ExponentExpr member) {
         super(name);
         this.pp = pp;
-        this.member = new SchnorrZnVariable(memberName, pp.getZn());
-        this.r = new SchnorrZnVariable("r", pp.getZn(), this);
-        this.blindedSignature = new SchnorrGroupElemVariable("blindedSignature", pp.g1.getStructure(), this);
-        homomorphicPart = pp.bilinearGroup.getBilinearMap().expr(
-                    new InternalSchnorrGroupVariableExpr(blindedSignature),
-                    pp.g2.expr().pow(member.getName())
-                ).op(pp.bilinearGroup.getBilinearMap().expr(pp.g1, pp.g2).pow(new InternalSchnorrExponentVariableExpr(r).negate()));
-        homomorphismTarget = pp.bilinearGroup.getBilinearMap().expr(
-                new InternalSchnorrGroupVariableExpr(blindedSignature),
-                pp.pk.expr()
-        ).inv();
+        this.member = member;
+
+        this.r = new SchnorrZnVariable(new InternalZnVariableExpr(name, "r"), pp.getZn());
     }
 
     @Override
     public Collection<SchnorrVariable> getWitnesses(SchnorrInput commonInput) {
-        return Arrays.asList(member, r);
+        ArrayList<SchnorrVariable> vars = new ArrayList<>();
+        member.getVariables().forEach(v -> vars.add(new SchnorrZnVariable(v, pp.getZn())));
+        vars.add(r);
+        return vars;
     }
 
     @Override
@@ -59,11 +58,11 @@ public class SetMembershipStatement extends SchnorrStatement {
 
     @Override
     public Announcement generateInternalAnnouncement(SchnorrInput commonInput, SchnorrInput secretInput, AnnouncementSecret announcementSecret) {
-        return new SetMembershipAnnouncement(getSignatureOnMember(secretInput).pow(((SetMembershipAnnouncementSecret) announcementSecret).r));
+        return new SetMembershipAnnouncement(getSignatureOnMember(commonInput, secretInput).pow(((SetMembershipAnnouncementSecret) announcementSecret).r));
     }
 
-    private GroupElement getSignatureOnMember(SchnorrInput secretInput) {
-        return pp.signatures.get(secretInput.getInteger(member.getName()));
+    private GroupElement getSignatureOnMember(SchnorrInput commonInput, SchnorrInput secretInput) {
+        return pp.signatures.get(member.substitute(commonInput).evaluate(pp.getZn(), secretInput).getInteger());
     }
 
     @Override
@@ -77,22 +76,26 @@ public class SetMembershipStatement extends SchnorrStatement {
     }
 
     @Override
-    public SchnorrImage recreateImage(SchnorrInput commonInput, Representation repr) {
-        return new GroupElementImage(repr, pp.bilinearGroup.getGT());
+    public GroupElement recreateImage(SchnorrInput commonInput, Representation repr) {
+        return pp.bilinearGroup.getGT().getElement(repr);
     }
 
     @Override
-    public SchnorrImage getHomomorphismTarget(SchnorrInput commonInput, Announcement internalAnnouncement) {
-        return new GroupElementImage(substituteBlindedSignature(homomorphismTarget, internalAnnouncement));
+    public GroupElement getHomomorphismTarget(SchnorrInput commonInput, Announcement internalAnnouncement) {
+        return pp.bilinearGroup.getBilinearMap().apply(
+                ((SetMembershipAnnouncement) internalAnnouncement).blindedSig,
+                pp.pk
+        ).inv();
     }
 
     @Override
-    public SchnorrImage evaluateHomomorphism(SchnorrInput commonInput, Announcement internalAnnouncement, SchnorrPreimage preimage) {
-        return new GroupElementImage(substituteBlindedSignature(homomorphicPart, internalAnnouncement).substitute(preimage));
-    }
-
-    protected GroupElementExpression substituteBlindedSignature(GroupElementExpression e, Announcement internalAnnouncement) {
-        return e.substitute(expr -> expr instanceof InternalSchnorrGroupVariableExpr && ((InternalSchnorrGroupVariableExpr) expr).getVariable().equals(blindedSignature) ? ((SetMembershipAnnouncement) internalAnnouncement).blindedSig.expr() : null);
+    public GroupElement evaluateHomomorphism(SchnorrInput commonInput, Announcement internalAnnouncement, SchnorrPreimage preimage) {
+        return pp.bilinearGroup.getBilinearMap().apply(
+                    ((SetMembershipAnnouncement) internalAnnouncement).blindedSig,
+                    pp.g2.pow(member.evaluate(pp.getZn(), preimage))
+        ).op(
+                pp.bilinearGroup.getBilinearMap().apply(pp.g1, pp.g2).pow(r.getVariableExpr().negate().evaluate(pp.getZn(), preimage))
+        );
     }
 
     @Override
@@ -100,7 +103,7 @@ public class SetMembershipStatement extends SchnorrStatement {
         return pp.getZn().size();
     }
 
-    protected class SetMembershipAnnouncementSecret implements AnnouncementSecret {
+    protected static class SetMembershipAnnouncementSecret implements AnnouncementSecret {
         public final Zn.ZnElement r;
 
         public SetMembershipAnnouncementSecret(Zn.ZnElement r) {
@@ -108,7 +111,7 @@ public class SetMembershipStatement extends SchnorrStatement {
         }
     }
 
-    protected class SetMembershipAnnouncement implements Announcement {
+    protected static class SetMembershipAnnouncement implements Announcement {
         public final GroupElement blindedSig;
 
         public SetMembershipAnnouncement(GroupElement blindedSig) {

@@ -5,23 +5,19 @@ import de.upb.crypto.math.hash.annotations.AnnotatedUbrUtil;
 import de.upb.crypto.math.hash.annotations.UniqueByteRepresented;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
 import de.upb.crypto.math.interfaces.structures.GroupElement;
-import de.upb.crypto.math.serialization.ListRepresentation;
 import de.upb.crypto.math.serialization.ObjectRepresentation;
 import de.upb.crypto.math.serialization.Representation;
-import de.upb.crypto.math.serialization.annotations.AnnotatedRepresentationUtil;
-import de.upb.crypto.math.serialization.annotations.v2.Represented;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SchnorrAnnouncement implements Announcement {
     @UniqueByteRepresented
     protected HashMap<String, Announcement> internalAnnouncements;
     @UniqueByteRepresented
-    protected HashMap<String, SchnorrImage> randomImages;
+    protected HashMap<String, GroupElement> randomImages;
 
-    public SchnorrAnnouncement(Map<String, Announcement> internalAnnouncements, Map<String, SchnorrImage> randomImages) {
+    public SchnorrAnnouncement(Map<String, Announcement> internalAnnouncements, Map<String, GroupElement> randomImages) {
         this.internalAnnouncements = new HashMap<>(internalAnnouncements);
         this.randomImages = new HashMap<>(randomImages);
     }
@@ -30,7 +26,7 @@ public class SchnorrAnnouncement implements Announcement {
         return internalAnnouncements.get(statement);
     }
 
-    public SchnorrImage getRandomImage(String statement) {
+    public GroupElement getRandomImage(String statement) {
         return randomImages.get(statement);
     }
 

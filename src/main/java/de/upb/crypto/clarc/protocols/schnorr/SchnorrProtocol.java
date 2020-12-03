@@ -8,7 +8,9 @@ import de.upb.crypto.clarc.protocols.schnorr.stmts.api.SchnorrVariable;
 import de.upb.crypto.clarc.protocols.schnorr.stmts.api.SchnorrVariableValue;
 import de.upb.crypto.math.expressions.bool.BoolEmptyExpr;
 import de.upb.crypto.math.expressions.bool.BooleanExpression;
+import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.random.interfaces.RandomGeneratorSupplier;
+import de.upb.crypto.math.serialization.RepresentableRepresentation;
 import de.upb.crypto.math.serialization.Representation;
 
 import java.math.BigInteger;
@@ -49,7 +51,7 @@ public class SchnorrProtocol implements SigmaProtocol {
         Map<String, Announcement> internalAnnouncements = ((SchnorrAnnouncementSecret) announcementSecret).getInternalAnnouncements();
 
         //Compute the random images
-        HashMap<String, SchnorrImage> randomImages = new HashMap<>();
+        HashMap<String, GroupElement> randomImages = new HashMap<>();
         for (SchnorrStatement stmt : statements)
             randomImages.put(stmt.getName(), stmt.evaluateHomomorphism((SchnorrInput) commonInput, internalAnnouncements.get(stmt.getName()), ((SchnorrAnnouncementSecret) announcementSecret).getRandomPreimage()));
 
@@ -91,19 +93,19 @@ public class SchnorrProtocol implements SigmaProtocol {
         BooleanExpression expr = new BoolEmptyExpr();
         for (SchnorrStatement stmt : statements) {
             Announcement internalAnnouncement = ((SchnorrAnnouncement) announcement).getInternalAnnouncement(stmt.getName());
-            SchnorrImage randomImageFromAnnouncement = ((SchnorrAnnouncement) announcement).getRandomImage(stmt.getName());
+            GroupElement randomImageFromAnnouncement = ((SchnorrAnnouncement) announcement).getRandomImage(stmt.getName());
             expr = expr.and( //(TargetImage ^ challenge) * randomImageFromAnnouncement = hom(response)
                     stmt.getHomomorphismTarget((SchnorrInput) commonInput, internalAnnouncement)
                             .pow(((SchnorrChallenge) challenge).getChallenge())
                             .op(randomImageFromAnnouncement)
-                    .isEqualTo(stmt.evaluateHomomorphism((SchnorrInput) commonInput, internalAnnouncement, ((SchnorrPreimage) response)))
+                            .expr().isEqualTo(stmt.evaluateHomomorphism((SchnorrInput) commonInput, internalAnnouncement, ((SchnorrPreimage) response)))
             );
         }
 
         return expr;
     }
 
-    public SchnorrImage applyHomomorphismOnWitness(CommonInput commonInput, SecretInput secretInput, Announcement announcement, AnnouncementSecret announcementSecret, SchnorrStatement stmt) {
+    public GroupElement applyHomomorphismOnWitness(CommonInput commonInput, SecretInput secretInput, Announcement announcement, AnnouncementSecret announcementSecret, SchnorrStatement stmt) {
         SchnorrPreimage preimage = getEffectiveWitness(commonInput, secretInput, announcement, announcementSecret);
         return stmt.evaluateHomomorphism((SchnorrInput) commonInput, ((SchnorrAnnouncement) announcement).getInternalAnnouncement(stmt.getName()), preimage);
     }
@@ -132,7 +134,7 @@ public class SchnorrProtocol implements SigmaProtocol {
     @Override
     public Announcement recreateAnnouncement(Representation repr, CommonInput commonInput) {
         HashMap<String, Announcement> internalAnnouncements = new HashMap<>();
-        HashMap<String, SchnorrImage> randomImages = new HashMap<>();
+        HashMap<String, GroupElement> randomImages = new HashMap<>();
         for (SchnorrStatement stmt : statements) {
             internalAnnouncements.put(stmt.getName(), stmt.recreateInternalAnnouncement((SchnorrInput) commonInput, repr.obj().get("announcements").obj().get(stmt.getName())));
             randomImages.put(stmt.getName(), stmt.recreateImage((SchnorrInput) commonInput, repr.obj().get("images").obj().get(stmt.getName())));
@@ -152,14 +154,7 @@ public class SchnorrProtocol implements SigmaProtocol {
     }
 
     public SchnorrPreimage recreateSchnorrPreimage(Representation repr, CommonInput commonInput) {
-        HashMap<SchnorrVariable, SchnorrVariableValue> result = new HashMap<>();
-        for (SchnorrVariable var : getEffectivePreimageSpace(commonInput)) {
-            String scope = var.getScopeString();
-            SchnorrVariableValue val = var.recreateValue(repr.obj().get(scope).obj().get(var.getName()));
-            result.put(var, val);
-        }
-
-        return new SchnorrPreimage(result);
+        return new SchnorrPreimage(getEffectivePreimageSpace(commonInput), repr);
     }
 
     protected Set<SchnorrVariable> getEffectivePreimageSpace(CommonInput commonInput) {

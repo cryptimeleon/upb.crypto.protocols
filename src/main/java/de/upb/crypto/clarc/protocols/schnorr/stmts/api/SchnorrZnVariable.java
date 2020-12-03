@@ -1,6 +1,8 @@
 package de.upb.crypto.clarc.protocols.schnorr.stmts.api;
 
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
+import de.upb.crypto.math.expressions.VariableExpression;
+import de.upb.crypto.math.expressions.exponent.ExponentVariableExpr;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.structures.zn.Zn;
 
@@ -9,13 +11,18 @@ import java.util.Objects;
 public class SchnorrZnVariable extends SchnorrVariable {
     public final Zn zn;
 
-    public SchnorrZnVariable(String name, Zn zn, SchnorrStatement privateToStatement) {
+    public SchnorrZnVariable(VariableExpression name, Zn zn, SchnorrStatement privateToStatement) {
         super(name, privateToStatement);
         this.zn = zn;
     }
 
-    public SchnorrZnVariable(String name, Zn zn) {
+    public SchnorrZnVariable(VariableExpression name, Zn zn) {
         this(name, zn, null);
+    }
+
+    @Override
+    public ExponentVariableExpr getVariableExpr() {
+        return (ExponentVariableExpr) super.getVariableExpr();
     }
 
     @Override

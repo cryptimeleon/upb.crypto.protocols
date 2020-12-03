@@ -2,9 +2,10 @@ package de.upb.crypto.clarc.protocols.schnorr.stmts.api;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.clarc.protocols.arguments.sigma.AnnouncementSecret;
-import de.upb.crypto.clarc.protocols.schnorr.SchnorrImage;
+
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrInput;
 import de.upb.crypto.clarc.protocols.schnorr.SchnorrPreimage;
+import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.Representation;
 
 import java.math.BigInteger;
@@ -51,10 +52,10 @@ public abstract class SchnorrStatement {
     public abstract Announcement recreateInternalAnnouncement(SchnorrInput commonInput, Representation repr);
     public abstract Announcement simulateInternalAnnouncement(SchnorrInput commonInput);
 
-    public abstract SchnorrImage recreateImage(SchnorrInput commonInput, Representation repr);
+    public abstract GroupElement recreateImage(SchnorrInput commonInput, Representation repr);
 
-    public abstract SchnorrImage getHomomorphismTarget(SchnorrInput commonInput, Announcement internalAnnouncement);
-    public abstract SchnorrImage evaluateHomomorphism(SchnorrInput commonInput, Announcement internalAnnouncement, SchnorrPreimage preimage);
+    public abstract GroupElement getHomomorphismTarget(SchnorrInput commonInput, Announcement internalAnnouncement);
+    public abstract GroupElement evaluateHomomorphism(SchnorrInput commonInput, Announcement internalAnnouncement, SchnorrPreimage preimage);
 
     /**
      * Returns an upper bound for the challenge (will be between 0 and whatever you return here).

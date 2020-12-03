@@ -36,8 +36,8 @@ public class SchnorrZnVariableValue implements SchnorrVariableValue {
     }
 
     @Override
-    public Expression asExpression() {
-        return new ExponentConstantExpr(value);
+    public ExponentConstantExpr asExpression() {
+        return getValue().asExponentExpression();
     }
 
     public Zn.ZnElement getValue() {
