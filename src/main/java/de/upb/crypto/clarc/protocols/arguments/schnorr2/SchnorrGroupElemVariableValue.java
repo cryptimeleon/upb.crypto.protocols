@@ -1,6 +1,7 @@
-package de.upb.crypto.clarc.protocols.schnorr.stmts.api;
+package de.upb.crypto.clarc.protocols.arguments.schnorr2;
 
-import de.upb.crypto.math.expressions.group.GroupElementConstantExpr;
+import de.upb.crypto.math.expressions.Expression;
+import de.upb.crypto.math.expressions.group.GroupElementExpression;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
 import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.Representation;
@@ -25,7 +26,7 @@ public class SchnorrGroupElemVariableValue implements SchnorrVariableValue {
     }
 
     @Override
-    public SchnorrVariableValue evalLinear(BigInteger factor, SchnorrVariableValue summand) {
+    public SchnorrGroupElemVariableValue evalLinear(BigInteger factor, SchnorrVariableValue summand) {
         return new SchnorrGroupElemVariableValue(value.pow(factor).op(((SchnorrGroupElemVariableValue) summand).value), variable);
     }
 
@@ -35,7 +36,7 @@ public class SchnorrGroupElemVariableValue implements SchnorrVariableValue {
     }
 
     @Override
-    public GroupElementConstantExpr asExpression() {
+    public GroupElementExpression asExpression() {
         return getValue().expr();
     }
 

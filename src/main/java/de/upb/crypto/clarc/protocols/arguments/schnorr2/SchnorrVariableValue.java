@@ -1,4 +1,4 @@
-package de.upb.crypto.clarc.protocols.schnorr.stmts.api;
+package de.upb.crypto.clarc.protocols.arguments.schnorr2;
 
 import de.upb.crypto.math.expressions.Expression;
 import de.upb.crypto.math.expressions.VariableExpression;
@@ -14,14 +14,6 @@ public interface SchnorrVariableValue extends Representable, UniqueByteRepresent
     SchnorrVariableValue evalLinear(BigInteger factor, SchnorrVariableValue summand);
 
     SchnorrVariable getVariable();
-
-    default VariableExpression getName() {
-        return getVariable().getVariableExpr();
-    }
-
-    default SchnorrStatement getStatement() {
-        return getVariable().getStatement();
-    }
 
     Expression asExpression();
 }

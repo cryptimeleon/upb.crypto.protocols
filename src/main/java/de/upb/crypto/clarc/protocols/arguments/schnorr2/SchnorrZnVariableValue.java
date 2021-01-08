@@ -1,4 +1,4 @@
-package de.upb.crypto.clarc.protocols.schnorr.stmts.api;
+package de.upb.crypto.clarc.protocols.arguments.schnorr2;
 
 import de.upb.crypto.math.expressions.Expression;
 import de.upb.crypto.math.expressions.exponent.ExponentConstantExpr;
@@ -26,17 +26,17 @@ public class SchnorrZnVariableValue implements SchnorrVariableValue {
     }
 
     @Override
-    public SchnorrVariableValue evalLinear(BigInteger factor, SchnorrVariableValue summand) {
+    public SchnorrZnVariableValue evalLinear(BigInteger factor, SchnorrVariableValue summand) {
         return new SchnorrZnVariableValue(value.mul(factor).add(((SchnorrZnVariableValue) summand).value), variable);
     }
 
     @Override
-    public SchnorrVariable getVariable() {
+    public SchnorrZnVariable getVariable() {
         return variable;
     }
 
     @Override
-    public ExponentConstantExpr asExpression() {
+    public Expression asExpression() {
         return getValue().asExponentExpression();
     }
 
