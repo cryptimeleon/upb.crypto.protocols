@@ -1,6 +1,9 @@
-package de.upb.crypto.clarc.protocols.arguments.setmembership;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.setmembership;
 
-import de.upb.crypto.clarc.protocols.arguments.schnorr2.*;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.LinearStatementFragment;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVariableAssignment;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrZnVariable;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.SendThenDelegateFragment;
 import de.upb.crypto.math.expressions.exponent.ExponentExpr;
 import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.Representation;

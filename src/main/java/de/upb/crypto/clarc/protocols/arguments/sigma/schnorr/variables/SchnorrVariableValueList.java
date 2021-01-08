@@ -1,6 +1,5 @@
-package de.upb.crypto.clarc.protocols.arguments.schnorr2;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables;
 
-import de.upb.crypto.clarc.protocols.SecretInput;
 import de.upb.crypto.clarc.protocols.arguments.sigma.AnnouncementSecret;
 import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;

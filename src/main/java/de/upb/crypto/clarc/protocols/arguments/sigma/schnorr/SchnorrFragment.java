@@ -1,12 +1,8 @@
-package de.upb.crypto.clarc.protocols.arguments.schnorr2;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr;
 
-import de.upb.crypto.clarc.protocols.SecretInput;
 import de.upb.crypto.clarc.protocols.arguments.sigma.*;
-import de.upb.crypto.math.expressions.bool.BooleanExpression;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVariableAssignment;
 import de.upb.crypto.math.serialization.Representation;
-
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Part of a Schnorr-style protocol, which may depend on variables (witnesses)

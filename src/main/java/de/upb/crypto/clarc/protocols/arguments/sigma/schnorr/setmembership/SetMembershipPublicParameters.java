@@ -1,4 +1,4 @@
-package de.upb.crypto.clarc.protocols.arguments.setmembership;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.setmembership;
 
 import de.upb.crypto.math.factory.BilinearGroup;
 import de.upb.crypto.math.interfaces.structures.GroupElement;

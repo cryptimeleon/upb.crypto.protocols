@@ -1,7 +1,6 @@
-package de.upb.crypto.clarc.protocols.arguments.schnorr2;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables;
 
 import de.upb.crypto.math.expressions.Expression;
-import de.upb.crypto.math.expressions.exponent.ExponentConstantExpr;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.structures.zn.Zn;

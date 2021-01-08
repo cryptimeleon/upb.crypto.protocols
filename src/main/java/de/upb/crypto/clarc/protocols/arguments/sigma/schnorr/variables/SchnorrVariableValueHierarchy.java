@@ -1,4 +1,4 @@
-package de.upb.crypto.clarc.protocols.arguments.schnorr2;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables;
 
 public class SchnorrVariableValueHierarchy implements SchnorrVariableAssignment {
     private final SchnorrVariableAssignment tryFirst;

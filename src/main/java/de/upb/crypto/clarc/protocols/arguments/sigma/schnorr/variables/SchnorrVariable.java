@@ -1,11 +1,10 @@
-package de.upb.crypto.clarc.protocols.arguments.schnorr2;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables;
 
 import de.upb.crypto.math.expressions.VariableExpression;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.serialization.annotations.v2.RepresentationRestorer;
 
 import java.lang.reflect.Type;
-import java.util.Objects;
 
 /**
  * A variable in the context of SchnorrFragments.
@@ -16,7 +15,7 @@ import java.util.Objects;
  * Two variables are equal iff they are the same object.
  */
 public abstract class SchnorrVariable implements RepresentationRestorer, VariableExpression {
-    protected final String name;
+    public final String name;
 
     public SchnorrVariable(String name) {
         this.name = name;

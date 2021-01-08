@@ -1,4 +1,4 @@
-package de.upb.crypto.clarc.protocols.arguments.schnorr2;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Challenge;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;

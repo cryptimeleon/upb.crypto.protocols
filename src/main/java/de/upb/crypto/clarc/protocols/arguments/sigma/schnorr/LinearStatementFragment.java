@@ -1,6 +1,8 @@
-package de.upb.crypto.clarc.protocols.arguments.schnorr2;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.*;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVariable;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVariableAssignment;
 import de.upb.crypto.math.expressions.VariableExpression;
 import de.upb.crypto.math.expressions.bool.GroupEqualityExpr;
 import de.upb.crypto.math.expressions.group.GroupElementExpression;

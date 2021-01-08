@@ -1,6 +1,7 @@
-package de.upb.crypto.clarc.protocols.arguments.schnorr2;
+package de.upb.crypto.clarc.protocols.arguments.sigma.schnorr;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.*;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.*;
 import de.upb.crypto.math.hash.annotations.AnnotatedUbrUtil;
 import de.upb.crypto.math.hash.annotations.UniqueByteRepresented;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
@@ -10,6 +11,7 @@ import de.upb.crypto.math.interfaces.structures.Group;
 import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.interfaces.structures.Structure;
 import de.upb.crypto.math.serialization.ListRepresentation;
+import de.upb.crypto.math.serialization.ObjectRepresentation;
 import de.upb.crypto.math.serialization.Representable;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.structures.zn.Zn;
@@ -102,7 +104,11 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
             return false;
         }
 
-        return provideAdditionalCheck(sendFirstValue);
+        if (!provideAdditionalCheck(sendFirstValue)) {
+            System.err.println("Additional check on the sendFirstValue of "+this.getClass().getName()+" fails");
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -164,7 +170,19 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
     }
 
     public interface SendFirstValue extends Representable, UniqueByteRepresentable {
+        SendFirstValue EMPTY = new EmptySendFirstValue();
+    }
 
+    private static class EmptySendFirstValue implements SendFirstValue {
+        @Override
+        public ByteAccumulator updateAccumulator(ByteAccumulator accumulator) {
+            return accumulator;
+        }
+
+        @Override
+        public Representation getRepresentation() {
+            return new ObjectRepresentation();
+        }
     }
 
     public static class AlgebraicSendFirstValue implements SendFirstValue {
@@ -355,6 +373,7 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
         private boolean isBuilt = false;
 
         public SubprotocolSpec build() {
+            checkIsBuilt();
             isBuilt = true;
             return new SubprotocolSpec(subprotocols, variables);
         }
@@ -411,40 +430,55 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
         private SendFirstValue sendFirstValue;
         private SubprotocolSpec subprotocolSpec;
         private final Map<String, SchnorrVariableValue> witnessesForVariables = new HashMap<>();
+        private final Map<String, Zn.ZnElement> znWitnesses = new HashMap<>();
+        private final Map<String, GroupElement> groupElemWitnesses = new HashMap<>();
+        private boolean isBuilt = false;
 
-        public ProverSpecBuilder setSendFirstValue(SendFirstValue sendFirstValue) {
+        public void setSendFirstValue(SendFirstValue sendFirstValue) {
             if (this.sendFirstValue != null)
                 throw new IllegalStateException("Cannot overwrite sendFirstValue");
             this.sendFirstValue = sendFirstValue;
 
             subprotocolSpec = provideSubprotocolSpec(sendFirstValue);
-            return this;
         }
 
         public SubprotocolSpec getSubprotocolSpec() {
             return subprotocolSpec;
         }
 
-        public ProverSpecBuilder putWitnessValue(String variableName, SchnorrVariableValue witnessValue) {
-            if (!subprotocolSpec.containsVariable(variableName))
-                throw new IllegalArgumentException("Not a witness variable: "+variableName);
-
+        public void putWitnessValue(String variableName, SchnorrVariableValue witnessValue) {
+            checkDuplicate(variableName);
             witnessesForVariables.put(variableName, witnessValue);
-            return this;
         }
 
-        public ProverSpecBuilder putWitnessValue(String variableName, Zn.ZnElement witnessValue) {
-            return putWitnessValue(variableName, new SchnorrZnVariableValue(witnessValue, (SchnorrZnVariable) subprotocolSpec.variables.get(variableName)));
+        public void putWitnessValue(String variableName, Zn.ZnElement witnessValue) {
+            checkDuplicate(variableName);
+            znWitnesses.put(variableName, witnessValue);
         }
 
-        public ProverSpecBuilder putWitnessValue(String variableName, GroupElement witnessValue) {
-            return putWitnessValue(variableName, new SchnorrGroupElemVariableValue(witnessValue, (SchnorrGroupElemVariable) subprotocolSpec.variables.get(variableName)));
+        public void putWitnessValue(String variableName, GroupElement witnessValue) {
+            checkDuplicate(variableName);
+            groupElemWitnesses.put(variableName, witnessValue);
+        }
+
+        private void checkDuplicate(String name) {
+            if (witnessesForVariables.containsKey(name) || znWitnesses.containsKey(name) || groupElemWitnesses.containsKey(name))
+                throw new IllegalArgumentException("Witness "+name+" is already registered.");
         }
 
         private WitnessValues buildWitnessValues() {
+            //Populate the witnessForVariables map with znWitnesses and groupElemWitnesses (not possible earlier because user may have added variables by name before subprotocolSpec has been set up with the concrete SchnorrVariable objects)
+            znWitnesses.forEach((name, val) -> witnessesForVariables.put(name, new SchnorrZnVariableValue(val, (SchnorrZnVariable) subprotocolSpec.getVariable(name))));
+            groupElemWitnesses.forEach((name, val) -> witnessesForVariables.put(name, new SchnorrGroupElemVariableValue(val, (SchnorrGroupElemVariable) subprotocolSpec.getVariable(name))));
+
             subprotocolSpec.forEachVariable((name, var) -> {
                 if (!witnessesForVariables.containsKey(name))
                     throw new IllegalStateException("Witness for " + name + "is missing");
+            });
+
+            witnessesForVariables.forEach((name, val) -> {
+                if (!subprotocolSpec.containsVariable(val.getVariable()))
+                    throw new IllegalStateException("");
             });
 
             return new WitnessValues(witnessesForVariables);
@@ -455,6 +489,9 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
         }
 
         public ProverSpec build() {
+            if (isBuilt)
+                throw new IllegalStateException("has already been built");
+            isBuilt = true;
             if (sendFirstValue == null || subprotocolSpec == null)
                 throw new IllegalStateException("sendFirstValue is not set or subprotocolSpec is null");
             return new ProverSpec(sendFirstValue, subprotocolSpec, getWitnessValues());
