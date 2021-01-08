@@ -10,26 +10,45 @@ import de.upb.crypto.math.serialization.Representation;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * Holds an ordered list of SchnorrVariableValues.
  */
-public class SchnorrVariableList implements SchnorrVariableAssignment, AnnouncementSecret, Response, SecretInput {
+public class SchnorrVariableValueList implements SchnorrVariableAssignment, AnnouncementSecret, Response {
     private final LinkedHashMap<SchnorrVariable, SchnorrVariableValue> variableValues;
 
-    public SchnorrVariableList(List<? extends SchnorrVariableValue> variableValues) {
+    public SchnorrVariableValueList(List<? extends SchnorrVariableValue> variableValues) {
         this.variableValues = new LinkedHashMap<>();
         for (SchnorrVariableValue val : variableValues)
             this.variableValues.put(val.getVariable(), val);
     }
 
-    public SchnorrVariableList(List<? extends SchnorrVariable> variables, Representation repr) {
+    public SchnorrVariableValueList(List<? extends SchnorrVariable> variables, Representation repr) {
         int i=0;
         variableValues = new LinkedHashMap<>();
         for (SchnorrVariable variable : variables) {
             SchnorrVariableValue val = variable.recreateValue(repr.list().get(i++));
             variableValues.put(val.getVariable(), val);
         }
+    }
+
+    private SchnorrVariableValueList(LinkedHashMap<SchnorrVariable, SchnorrVariableValue> variableValues) {
+        this.variableValues = variableValues;
+    }
+
+    /**
+     * Creates the list by ordering the given values lexicographically by their name
+     * @param nameValueMap variableName -> variableValue
+     */
+    public SchnorrVariableValueList(Map<String, SchnorrVariableValue> nameValueMap) {
+        this(nameValueMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList())
+        );
     }
 
     @Override
@@ -51,5 +70,12 @@ public class SchnorrVariableList implements SchnorrVariableAssignment, Announcem
                 .forEachOrdered(repr::add);
 
         return repr;
+    }
+
+    public SchnorrVariableValueList map(BiFunction<SchnorrVariable, SchnorrVariableValue, SchnorrVariableValue> mapper) {
+        LinkedHashMap<SchnorrVariable, SchnorrVariableValue> newValues = new LinkedHashMap<>();
+        this.variableValues.forEach((k, v) -> newValues.put(k, mapper.apply(k, v)));
+
+        return new SchnorrVariableValueList(newValues);
     }
 }

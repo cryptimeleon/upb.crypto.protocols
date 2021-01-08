@@ -14,15 +14,15 @@ import java.util.function.Function;
  * It is usually part of a larger composition of fragments that form a complete protocol.
  */
 public interface SchnorrFragment {
-    AnnouncementSecret generateAnnouncementSecret(SecretInput secretInput);
+    AnnouncementSecret generateAnnouncementSecret(SchnorrVariableAssignment outerWitnesses);
 
-    Announcement generateAnnouncement(Function<SchnorrVariable, SchnorrVariableValue> outerRandom, SecretInput secretInput, AnnouncementSecret announcementSecret);
+    Announcement generateAnnouncement(SchnorrVariableAssignment outerWitnesses, AnnouncementSecret announcementSecret, SchnorrVariableAssignment outerRandom);
 
-    Response generateResponse(SecretInput secretInput, AnnouncementSecret announcementSecret, Challenge challenge);
+    Response generateResponse(SchnorrVariableAssignment outerWitnesses, AnnouncementSecret announcementSecret, Challenge challenge);
 
-    boolean checkTranscript(Announcement announcement, Challenge challenge, Response response, Function<SchnorrVariable, SchnorrVariableValue> outerResponse);
+    boolean checkTranscript(Announcement announcement, Challenge challenge, Response response, SchnorrVariableAssignment outerResponse);
 
-    SigmaProtocolTranscript generateSimulatedTranscript(Challenge challenge, Function<SchnorrVariable, SchnorrVariableValue> outerRandomResponse);
+    SigmaProtocolTranscript generateSimulatedTranscript(Challenge challenge, SchnorrVariableAssignment outerRandomResponse);
 
     Announcement recreateAnnouncement(Representation repr);
     Response recreateResponse(Announcement announcement, Representation repr);

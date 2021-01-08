@@ -1,10 +1,6 @@
 package de.upb.crypto.clarc.protocols.arguments.setmembership;
 
-import de.upb.crypto.clarc.protocols.SecretInput;
-import de.upb.crypto.clarc.protocols.arguments.schnorr2.DlogRepresentationFragment;
-import de.upb.crypto.clarc.protocols.arguments.schnorr2.SchnorrZnVariable;
-import de.upb.crypto.clarc.protocols.arguments.schnorr2.SendThenDelegateFragment;
-import de.upb.crypto.clarc.protocols.arguments.schnorr2.SchnorrVariableList;
+import de.upb.crypto.clarc.protocols.arguments.schnorr2.*;
 import de.upb.crypto.math.expressions.exponent.ExponentExpr;
 import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.Representation;
@@ -20,22 +16,22 @@ public class SetMembershipFragment extends SendThenDelegateFragment {
     }
 
     @Override
-    protected SendFirstSecret provideSendFirstSecret(SecretInput secretInput) {
-        return new BasicSendFirstSecret().putZnElement("r", pp.getZn().getUniformlyRandomNonzeroElement());
-    }
+    protected ProverSpec provideProverSpec(SchnorrVariableAssignment outerWitnesses) {
+        Zn.ZnElement r = pp.getZn().getUniformlyRandomNonzeroElement();
+        ProverSpecBuilder builder = new ProverSpecBuilder();
+        builder.putWitnessValue("r", r);
 
-    @Override
-    protected SendFirstValue provideSendFirstValue(SecretInput secretInput, SendFirstSecret sendFirstSecret) {
         //Compute member with respect to given witnesses
-        Zn.ZnElement memberVal = member.evaluate(pp.getZn(), (SchnorrVariableList) secretInput); //TODO is this right?
+        Zn.ZnElement memberVal = member.evaluate(pp.getZn(), outerWitnesses);
 
-        //Pick the right signature
+        //Pick the right signature for memberVal
         GroupElement signature = pp.signatures.get(memberVal.getInteger());
 
         //Blind signature with blinding value
-        GroupElement blindedSignature = signature.pow(((BasicSendFirstSecret) sendFirstSecret).getZnElem("r"));
+        GroupElement blindedSignature = signature.pow(r);
+        builder.setSendFirstValue(new AlgebraicSendFirstValue(blindedSignature));
 
-        return new AlgebraicSendFirstValue(blindedSignature);
+        return builder.build();
     }
 
     @Override
@@ -56,20 +52,13 @@ public class SetMembershipFragment extends SendThenDelegateFragment {
         //Add proof that prover knows how to derandomize the blinded signature such that it's valid on member.
         SchnorrZnVariable signatureBlindingValue = builder.addZnVariable("r", pp.getZn()); //"prove knowledge of r"
         builder.addSubprotocol("signatureCheck", //"prove the following equation about r and the member"
-            new DlogRepresentationFragment( //e(blindedSignature, pk * g2^member) = e(g1,g2)^r, where blindedSignature = g1^(r * 1/(sk + member)) and pk = g2^sk.
+            new LinearStatementFragment( //e(blindedSignature, pk * g2^member) = e(g1,g2)^r, where blindedSignature = g1^(r * 1/(sk + member)) and pk = g2^sk.
                     pp.bilinearGroup.getBilinearMap().applyExpr(blindedSignature, pp.pk.op(pp.g2.pow(member)))
                     .isEqualTo(pp.egg.pow(signatureBlindingValue))
             )
         );
 
         return builder.build();
-    }
-
-    @Override
-    protected SubprotocolSpecSecrets provideSubprotocolSpecSecrets(SubprotocolSpec spec, SecretInput secretInput, SendFirstSecret sendFirstSecret) {
-        return new SubprotocolSpecSecretBuilder(spec)
-                .putWitness("r", ((BasicSendFirstSecret) sendFirstSecret).getZnElem("r"))
-                .build();
     }
 
     @Override

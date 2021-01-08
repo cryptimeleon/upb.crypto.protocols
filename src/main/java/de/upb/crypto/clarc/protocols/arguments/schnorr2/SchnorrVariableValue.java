@@ -1,7 +1,6 @@
 package de.upb.crypto.clarc.protocols.arguments.schnorr2;
 
 import de.upb.crypto.math.expressions.Expression;
-import de.upb.crypto.math.expressions.VariableExpression;
 import de.upb.crypto.math.interfaces.hash.UniqueByteRepresentable;
 import de.upb.crypto.math.serialization.Representable;
 
