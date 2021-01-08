@@ -2,7 +2,6 @@ package de.upb.crypto.clarc.protocols.arguments.schnorr2;
 
 import de.upb.crypto.clarc.protocols.SecretInput;
 import de.upb.crypto.clarc.protocols.arguments.sigma.*;
-import de.upb.crypto.clarc.protocols.schnorr.SchnorrChallenge;
 import de.upb.crypto.math.expressions.Substitution;
 import de.upb.crypto.math.expressions.bool.GroupEqualityExpr;
 import de.upb.crypto.math.expressions.exponent.BasicNamedExponentVariableExpr;

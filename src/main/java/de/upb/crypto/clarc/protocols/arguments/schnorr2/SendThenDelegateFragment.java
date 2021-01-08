@@ -2,7 +2,6 @@ package de.upb.crypto.clarc.protocols.arguments.schnorr2;
 
 import de.upb.crypto.clarc.protocols.SecretInput;
 import de.upb.crypto.clarc.protocols.arguments.sigma.*;
-import de.upb.crypto.clarc.protocols.schnorr.SchnorrChallenge;
 import de.upb.crypto.math.hash.annotations.AnnotatedUbrUtil;
 import de.upb.crypto.math.hash.annotations.UniqueByteRepresented;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
