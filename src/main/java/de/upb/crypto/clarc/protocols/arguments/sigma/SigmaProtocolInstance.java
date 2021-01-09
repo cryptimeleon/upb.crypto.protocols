@@ -29,4 +29,9 @@ public abstract class SigmaProtocolInstance implements InteractiveArgumentInstan
     public SigmaProtocol getProtocol() {
         return protocol;
     }
+
+    @Override
+    public boolean isAccepting() {
+        return protocol.checkTranscript(commonInput, announcement, challenge, response);
+    }
 }

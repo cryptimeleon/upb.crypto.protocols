@@ -4,16 +4,17 @@ import de.upb.crypto.clarc.protocols.arguments.sigma.*;
 import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVariable;
 import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVariableAssignment;
 import de.upb.crypto.math.expressions.VariableExpression;
-import de.upb.crypto.math.expressions.bool.GroupEqualityExpr;
-import de.upb.crypto.math.expressions.group.GroupElementExpression;
-import de.upb.crypto.math.expressions.group.GroupOpExpr;
+import de.upb.crypto.math.expressions.bool.ExponentEqualityExpr;
+import de.upb.crypto.math.expressions.exponent.ExponentExpr;
+import de.upb.crypto.math.expressions.exponent.ExponentSumExpr;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
-import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.Representation;
+import de.upb.crypto.math.structures.zn.Zn;
 
-public class LinearStatementFragment implements SchnorrFragment {
-    private GroupElementExpression homomorphicPart;
-    private GroupElement target;
+public class LinearExponentStatementFragment implements SchnorrFragment {
+    private ExponentExpr homomorphicPart;
+    private Zn.ZnElement target;
+    private Zn zn;
 
     /**
      * Instantiates this fragment to prove knowledge a witness (consisting of values for all BasicNamedExponentVariableExpr in homomorphicPart) such that
@@ -22,7 +23,7 @@ public class LinearStatementFragment implements SchnorrFragment {
      * @param homomorphicPart an expression which is linear in its variables.
      * @param target the desired (public) image of homomorphicPart.
      */
-    public LinearStatementFragment(GroupElementExpression homomorphicPart, GroupElement target) {
+    public LinearExponentStatementFragment(ExponentExpr homomorphicPart, Zn.ZnElement target) {
         init(homomorphicPart, target);
     }
 
@@ -32,14 +33,15 @@ public class LinearStatementFragment implements SchnorrFragment {
      *
      * @throws IllegalArgumentException if equation is not supported (i.e. framework is unable to write it as linear(witnesses) = constant)
      */
-    public LinearStatementFragment(GroupEqualityExpr equation) throws IllegalArgumentException {
-        GroupOpExpr linearized = equation.getLhs().op(equation.getRhs().inv()).linearize();
-        init(linearized.getRhs(), linearized.getLhs().inv().evaluate());
+    public LinearExponentStatementFragment(ExponentEqualityExpr equation, Zn zn) throws IllegalArgumentException {
+        ExponentSumExpr linearized = equation.getLhs().sub(equation.getRhs()).linearize();
+        init(linearized.getRhs(), linearized.getLhs().negate().evaluate(zn));
     }
 
-    private void init(GroupElementExpression homomorphicPart, GroupElement target) {
+    private void init(ExponentExpr homomorphicPart, Zn.ZnElement target) {
         this.homomorphicPart = homomorphicPart;
         this.target = target;
+        this.zn = target.getStructure();
 
         homomorphicPart.treeWalk(expr -> {
             if (expr instanceof VariableExpression && !(expr instanceof SchnorrVariable))
@@ -55,8 +57,8 @@ public class LinearStatementFragment implements SchnorrFragment {
     @Override
     public Announcement generateAnnouncement(SchnorrVariableAssignment outerWitnesses, AnnouncementSecret announcementSecret, SchnorrVariableAssignment outerRandom) {
         //Evaluate homomorphicPart with respect random variable assignements from the AnnouncementSecret and the random assignments coming from the outside.
-        return new LinearStatementAnnouncement(
-                homomorphicPart.evaluate(outerRandom)
+        return new LinearExponentStatementAnnouncement(
+                homomorphicPart.evaluate(zn, outerRandom)
         );
     }
 
@@ -68,22 +70,22 @@ public class LinearStatementFragment implements SchnorrFragment {
     @Override
     public boolean checkTranscript(Announcement announcement, Challenge challenge, Response response, SchnorrVariableAssignment outerResponse) {
         //Check homomorphicPart(response) = announcement + c * target (additive group notation)
-        GroupElement evaluatedResponse = homomorphicPart.evaluate(outerResponse);
+        Zn.ZnElement evaluatedResponse = homomorphicPart.evaluate(zn, outerResponse);
 
-        return evaluatedResponse.equals(((LinearStatementAnnouncement) announcement).announcement.op(target.pow(((SchnorrChallenge) challenge).getChallenge())));
+        return evaluatedResponse.equals(((LinearExponentStatementAnnouncement) announcement).announcement.add(target.mul(((SchnorrChallenge) challenge).getChallenge())));
     }
 
     @Override
     public SigmaProtocolTranscript generateSimulatedTranscript(Challenge challenge, SchnorrVariableAssignment outerRandomResponse) {
         //Take outerRandomResponse, set annoncement to the unique value that makes the transcript valid.
-        GroupElement announcement = homomorphicPart.evaluate(outerRandomResponse).op(target.pow(((SchnorrChallenge) challenge).getChallenge()).inv());
+        Zn.ZnElement announcement = homomorphicPart.evaluate(zn, outerRandomResponse).sub(target.mul(((SchnorrChallenge) challenge).getChallenge()));
 
-        return new SigmaProtocolTranscript(new LinearStatementAnnouncement(announcement), challenge, Response.EMPTY);
+        return new SigmaProtocolTranscript(new LinearExponentStatementAnnouncement(announcement), challenge, Response.EMPTY);
     }
 
     @Override
     public Announcement recreateAnnouncement(Representation repr) {
-        return new LinearStatementAnnouncement(target.getStructure().getElement(repr));
+        return new LinearExponentStatementAnnouncement(zn.getElement(repr));
     }
 
     @Override
@@ -91,10 +93,10 @@ public class LinearStatementFragment implements SchnorrFragment {
         return Response.EMPTY;
     }
 
-    public static final class LinearStatementAnnouncement implements Announcement {
-        public final GroupElement announcement;
+    public static final class LinearExponentStatementAnnouncement implements Announcement {
+        public final Zn.ZnElement announcement;
 
-        public LinearStatementAnnouncement(GroupElement announcement) {
+        public LinearExponentStatementAnnouncement(Zn.ZnElement announcement) {
             this.announcement = announcement;
         }
 

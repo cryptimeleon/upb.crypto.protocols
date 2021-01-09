@@ -70,38 +70,43 @@ public class DamgardTechnique implements SigmaProtocol {
     }
 
     @Override
-    public BooleanExpression getTranscriptCheckExpression(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response) {
+    public boolean checkTranscript(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response) {
         if (!commitmentScheme.verify(((DamgardAnnouncement) announcement).getCommitment(),
                 ((DamgardResponse) response).getOpenValue(),
                 announcementToCommitmentPlaintext(((DamgardResponse) response).getInnerAnnouncement()))) {
-            return new BoolConstantExpr(false);
+            return false;
         }
 
-        return innerProtocol.getTranscriptCheckExpression(commonInput,
+        return innerProtocol.checkTranscript(commonInput,
                 ((DamgardResponse) response).getInnerAnnouncement(),
                 challenge,
                 ((DamgardResponse) response).getInnerResponse());
     }
 
     @Override
-    public SpecialHonestVerifierZkSimulator getSimulator() {
-        return new DamgardSimulator(this);
+    public SigmaProtocolTranscript generateSimulatedTranscript(CommonInput commonInput, Challenge challenge) {
+        SigmaProtocolTranscript inner = innerProtocol.generateSimulatedTranscript(commonInput, challenge);
+        CommitmentPair commitmentAndOpening = commitmentScheme.commit(announcementToCommitmentPlaintext(inner.getAnnouncement()));
+        return new SigmaProtocolTranscript(new DamgardAnnouncement(commitmentAndOpening.getCommitment()),
+                challenge,
+                new DamgardResponse(inner.getResponse(), inner.getAnnouncement(), commitmentAndOpening.getOpenValue()));
     }
 
     @Override
-    public Announcement recreateAnnouncement(Representation repr, CommonInput commonInput) {
+    public Announcement recreateAnnouncement(CommonInput commonInput, Representation repr) {
         return new DamgardAnnouncement(repr, commitmentScheme);
     }
 
     @Override
-    public Challenge recreateChallenge(Representation repr, CommonInput commonInput) {
-        return innerProtocol.recreateChallenge(repr, commonInput);
+    public Challenge recreateChallenge(CommonInput commonInput, Representation repr) {
+        return innerProtocol.recreateChallenge(commonInput, repr);
     }
 
     @Override
-    public DamgardResponse recreateResponse(Representation repr, CommonInput commonInput) {
-        return new DamgardResponse(innerProtocol.recreateResponse(repr.obj().get("innerResponse"), commonInput),
-                innerProtocol.recreateAnnouncement(repr.obj().get("innerAnnouncement"), commonInput),
+    public DamgardResponse recreateResponse(CommonInput commonInput, Announcement announcement, Challenge challenge, Representation repr) {
+        Announcement innerAnnouncement = innerProtocol.recreateAnnouncement(commonInput, repr.obj().get("innerAnnouncement"));
+        return new DamgardResponse(innerProtocol.recreateResponse(commonInput, innerAnnouncement, challenge, repr.obj().get("innerResponse")),
+                innerAnnouncement,
                 commitmentScheme.getOpenValue(repr.obj().get("openValue")));
     }
 

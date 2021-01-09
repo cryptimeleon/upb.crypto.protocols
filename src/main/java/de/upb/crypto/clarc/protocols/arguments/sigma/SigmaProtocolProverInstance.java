@@ -20,11 +20,6 @@ public class SigmaProtocolProverInstance extends SigmaProtocolInstance {
     }
 
     @Override
-    public BooleanExpression getAcceptanceExpression() {
-        throw new UnsupportedOperationException("The prover cannot check for acceptance.");
-    }
-
-    @Override
     public String getRoleName() {
         return InteractiveArgument.PROVER_ROLE;
     }
@@ -38,7 +33,7 @@ public class SigmaProtocolProverInstance extends SigmaProtocolInstance {
                 state = State.SENT_ANNOUNCEMENT;
                 return announcement.getRepresentation();
             case SENT_ANNOUNCEMENT:
-                challenge = protocol.recreateChallenge(received, commonInput);
+                challenge = protocol.recreateChallenge(commonInput, received);
                 state = State.SENT_RESPONSE;
                 response = protocol.generateResponse(commonInput, secretInput, announcement, announcementSecret, challenge);
                 return response.getRepresentation();

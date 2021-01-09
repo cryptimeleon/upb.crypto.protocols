@@ -45,8 +45,11 @@ public class SetMembershipPublicParameters implements Representable {
         Zn.ZnElement sk = group.getG1().getUniformlyRandomExponent();
         GroupElement pk = g2.pow(sk);
         HashMap<BigInteger, GroupElement> signatures = new HashMap<>();
-        for (BigInteger i : set)
+        for (BigInteger i : set) {
             signatures.put(i, g1.pow(sk.add(group.getZn().valueOf(i)).inv()));
+            if (i.compareTo(group.getG1().size()) > 0)
+                throw new IllegalArgumentException("Set contains too large a number.");
+        }
 
         return new SetMembershipPublicParameters(group, g1, g2, pk, signatures);
     }

@@ -15,22 +15,16 @@ public interface SigmaProtocol extends InteractiveArgument {
     Announcement generateAnnouncement(CommonInput commonInput, SecretInput secretInput, AnnouncementSecret announcementSecret);
     Challenge generateChallenge(CommonInput commonInput);
     Response generateResponse(CommonInput commonInput, SecretInput secretInput, Announcement announcement, AnnouncementSecret announcementSecret, Challenge challenge);
-    default boolean checkTranscript(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response) {
-        return getTranscriptCheckExpression(commonInput, announcement, challenge, response).evaluate();
-    }
+    boolean checkTranscript(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response);
     default boolean checkTranscript(CommonInput commonInput, SigmaProtocolTranscript transcript) {
         return checkTranscript(commonInput, transcript.getAnnouncement(), transcript.getChallenge(), transcript.getResponse());
     }
-    BooleanExpression getTranscriptCheckExpression(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response);
-    default BooleanExpression getTranscriptCheckExpression(CommonInput commonInput, SigmaProtocolTranscript transcript) {
-        return getTranscriptCheckExpression(commonInput, transcript.getAnnouncement(), transcript.getChallenge(), transcript.getResponse());
-    }
 
-    SpecialHonestVerifierZkSimulator getSimulator();
+    SigmaProtocolTranscript generateSimulatedTranscript(CommonInput commonInput, Challenge challenge);
 
-    Announcement recreateAnnouncement(Representation repr, CommonInput commonInput);
-    Challenge recreateChallenge(Representation repr, CommonInput commonInput);
-    Response recreateResponse(Representation repr, CommonInput commonInput);
+    Announcement recreateAnnouncement(CommonInput commonInput, Representation repr);
+    Challenge recreateChallenge(CommonInput commonInput, Representation repr);
+    Response recreateResponse(CommonInput commonInput, Announcement announcement, Challenge challenge, Representation repr);
     default SigmaProtocolTranscript recreateTranscript(Representation repr, CommonInput commonInput) {
         return new SigmaProtocolTranscript(this, commonInput, repr);
     }

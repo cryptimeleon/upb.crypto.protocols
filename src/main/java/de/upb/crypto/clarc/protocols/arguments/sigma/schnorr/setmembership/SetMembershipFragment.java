@@ -19,9 +19,8 @@ public class SetMembershipFragment extends SendThenDelegateFragment {
     }
 
     @Override
-    protected ProverSpec provideProverSpec(SchnorrVariableAssignment outerWitnesses) {
+    protected ProverSpec provideProverSpec(SchnorrVariableAssignment outerWitnesses, ProverSpecBuilder builder) {
         Zn.ZnElement r = pp.getZn().getUniformlyRandomNonzeroElement();
-        ProverSpecBuilder builder = new ProverSpecBuilder();
         builder.putWitnessValue("r", r);
 
         //Compute member with respect to given witnesses
@@ -48,8 +47,7 @@ public class SetMembershipFragment extends SendThenDelegateFragment {
     }
 
     @Override
-    protected SubprotocolSpec provideSubprotocolSpec(SendFirstValue sendFirstValue) {
-        SubprotocolSpecBuilder builder = new SubprotocolSpecBuilder();
+    protected SubprotocolSpec provideSubprotocolSpec(SendFirstValue sendFirstValue, SubprotocolSpecBuilder builder) {
         GroupElement blindedSignature = ((AlgebraicSendFirstValue) sendFirstValue).getGroupElement(0);
 
         //Add proof that prover knows how to derandomize the blinded signature such that it's valid on member.

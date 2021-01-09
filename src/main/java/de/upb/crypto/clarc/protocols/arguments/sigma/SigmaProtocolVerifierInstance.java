@@ -27,12 +27,12 @@ public class SigmaProtocolVerifierInstance extends SigmaProtocolInstance {
     public Representation nextMessage(Representation received) {
         switch (state) {
             case NOTHING: //receiving announcement
-                announcement = protocol.recreateAnnouncement(received, commonInput);
+                announcement = protocol.recreateAnnouncement(commonInput, received);
                 challenge = protocol.generateChallenge(commonInput);
                 state = State.SENT_CHALLENGE;
                 return challenge.getRepresentation();
             case SENT_CHALLENGE: //receiving response
-                response = protocol.recreateResponse(received, commonInput);
+                response = protocol.recreateResponse(commonInput, announcement, challenge, received);
                 state = State.RECEIVED_RESPONSE;
                 return null; //done
             case RECEIVED_RESPONSE:
@@ -45,10 +45,5 @@ public class SigmaProtocolVerifierInstance extends SigmaProtocolInstance {
     @Override
     public boolean hasTerminated() {
         return state == State.RECEIVED_RESPONSE;
-    }
-
-    @Override
-    public BooleanExpression getAcceptanceExpression() {
-        return protocol.getTranscriptCheckExpression(commonInput, announcement, challenge, response);
     }
 }

@@ -22,22 +22,21 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public abstract class SendThenDelegateFragment implements SchnorrFragment {
-    protected abstract ProverSpec provideProverSpec(SchnorrVariableAssignment outerWitnesses);
+    protected abstract ProverSpec provideProverSpec(SchnorrVariableAssignment outerWitnesses, ProverSpecBuilder builder);
     protected abstract SendFirstValue recreateSendFirstValue(Representation repr);
     protected abstract SendFirstValue simulateSendFirstValue();
 
-    protected abstract SubprotocolSpec provideSubprotocolSpec(SendFirstValue sendFirstValue);
+    protected abstract SubprotocolSpec provideSubprotocolSpec(SendFirstValue sendFirstValue, SubprotocolSpecBuilder builder);
 
     protected abstract boolean provideAdditionalCheck(SendFirstValue sendFirstValue);
 
     @Override
     public AnnouncementSecret generateAnnouncementSecret(SchnorrVariableAssignment outerWitnesses) {
         //Ask implementing class for prover stuff
-        ProverSpec proverSpec = provideProverSpec(outerWitnesses);
+        ProverSpec proverSpec = provideProverSpec(outerWitnesses, new ProverSpecBuilder(this));
 
         //Generate announcement secrets
-        HashMap<String, AnnouncementSecret> subprotocolAnnouncementSecrets = new HashMap<>();
-        proverSpec.subprotocolSpec.mapSubprotocols((name, subprotocol) ->
+        Map<String, AnnouncementSecret> subprotocolAnnouncementSecrets = proverSpec.subprotocolSpec.mapSubprotocols((name, subprotocol) ->
                 subprotocol.generateAnnouncementSecret(proverSpec.witnesses.fallbackTo(outerWitnesses)));
 
         //Generate random assignment of knowledge variables
@@ -58,7 +57,7 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
                 )
         );
 
-        return new SendThenDelegateAnnouncement(subprotocolAnnouncements, announcementSecret1.sendFirstValue);
+        return new SendThenDelegateAnnouncement(announcementSecret1.subprotocolSpec, subprotocolAnnouncements, announcementSecret1.sendFirstValue);
     }
 
     @Override
@@ -84,7 +83,7 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
     @Override
     public boolean checkTranscript(Announcement announcement, Challenge challenge, Response response, SchnorrVariableAssignment outerResponse) {
         SendFirstValue sendFirstValue = ((SendThenDelegateAnnouncement) announcement).sendFirstValue;
-        SubprotocolSpec subprotocolSpec = provideSubprotocolSpec(sendFirstValue);
+        SubprotocolSpec subprotocolSpec = ((SendThenDelegateAnnouncement) announcement).subprotocolSpec;
 
         //Check that subprotocol accept
         try {
@@ -114,7 +113,7 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
     @Override
     public SigmaProtocolTranscript generateSimulatedTranscript(Challenge challenge, SchnorrVariableAssignment outerRandomResponse) {
         SendFirstValue sendFirstValue = simulateSendFirstValue();
-        SubprotocolSpec subprotocolSpec = provideSubprotocolSpec(sendFirstValue);
+        SubprotocolSpec subprotocolSpec = provideSubprotocolSpec(sendFirstValue, new SubprotocolSpecBuilder());
 
         //Simulate our own knowledge variables by choosing a random response for them
         SchnorrVariableValueList randomResponses = subprotocolSpec.createRandomVariableAssignment();
@@ -131,7 +130,7 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
         });
 
         return new SigmaProtocolTranscript(
-                new SendThenDelegateAnnouncement(subprotocolAnnouncements, sendFirstValue),
+                new SendThenDelegateAnnouncement(subprotocolSpec, subprotocolAnnouncements, sendFirstValue),
                 challenge,
                 new SendThenDelegateResponse(subprotocolResponses, randomResponses)
         );
@@ -140,20 +139,19 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
     @Override
     public Announcement recreateAnnouncement(Representation repr) {
         SendFirstValue sendFirstValue = recreateSendFirstValue(repr.list().get(0));
-        SubprotocolSpec subprotocolSpec = provideSubprotocolSpec(sendFirstValue);
+        SubprotocolSpec subprotocolSpec = provideSubprotocolSpec(sendFirstValue, new SubprotocolSpecBuilder());
         HashMap<String, Announcement> subprotocolAnnouncements = new HashMap<>();
         List<Map.Entry<String, SchnorrFragment>> subprotocolList = subprotocolSpec.getOrderedListOfSubprotocolsAndNames();
 
         for (int i=0;i<subprotocolList.size();i++)
             subprotocolAnnouncements.put(subprotocolList.get(i).getKey(), subprotocolList.get(i).getValue().recreateAnnouncement(repr.list().get(i+1)));
 
-        return new SendThenDelegateAnnouncement(subprotocolAnnouncements, sendFirstValue); //TODO might as well cache subprotocolSpec and sendFirstValue in the announcement so that we don't have to call provideSubprotocolSpec() so often...
+        return new SendThenDelegateAnnouncement(subprotocolSpec, subprotocolAnnouncements, sendFirstValue);
     }
 
     @Override
     public Response recreateResponse(Announcement announcement, Representation repr) {
-        SendFirstValue sendFirstValue = ((SendThenDelegateAnnouncement) announcement).sendFirstValue;
-        SubprotocolSpec subprotocolSpec = provideSubprotocolSpec(sendFirstValue);
+        SubprotocolSpec subprotocolSpec = ((SendThenDelegateAnnouncement) announcement).subprotocolSpec;
 
         SchnorrVariableValueList variableResponses = new SchnorrVariableValueList(subprotocolSpec.getOrderedListOfVariables(), repr.list().get(0));
 
@@ -182,6 +180,16 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
         @Override
         public Representation getRepresentation() {
             return new ObjectRepresentation();
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof EmptySendFirstValue;
         }
     }
 
@@ -227,13 +235,13 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
     public static class SendThenDelegateAnnouncementSecret implements AnnouncementSecret {
         public final SchnorrVariableAssignment randomVariableValues;
         public final ProverSpec proverSpec;
-        public final HashMap<String, AnnouncementSecret> subprotocolAnnouncementSecret;
+        public final Map<String, AnnouncementSecret> subprotocolAnnouncementSecret;
         public final SubprotocolSpec subprotocolSpec;
         public final SendFirstValue sendFirstValue;
         public final WitnessValues witnessValues;
 
 
-        public SendThenDelegateAnnouncementSecret(SchnorrVariableAssignment randomVariableValues, ProverSpec proverSpec, HashMap<String, AnnouncementSecret> subprotocolAnnouncementSecret) {
+        public SendThenDelegateAnnouncementSecret(SchnorrVariableAssignment randomVariableValues, ProverSpec proverSpec, Map<String, AnnouncementSecret> subprotocolAnnouncementSecret) {
             this.randomVariableValues = randomVariableValues;
             this.proverSpec = proverSpec;
             this.subprotocolAnnouncementSecret = subprotocolAnnouncementSecret;
@@ -249,7 +257,10 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
         @UniqueByteRepresented
         public final SendFirstValue sendFirstValue;
 
-        public SendThenDelegateAnnouncement(Map<String, ? extends Announcement> subprotocolAnnouncements, SendFirstValue sendFirstValue) {
+        public final SubprotocolSpec subprotocolSpec;
+
+        public SendThenDelegateAnnouncement(SubprotocolSpec subprotocolSpec, Map<String, ? extends Announcement> subprotocolAnnouncements, SendFirstValue sendFirstValue) {
+            this.subprotocolSpec = subprotocolSpec;
             this.subprotocolAnnouncements.putAll(subprotocolAnnouncements);
             this.sendFirstValue = sendFirstValue;
         }
@@ -306,7 +317,7 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
         }
     }
 
-    protected static class SubprotocolSpec {
+    public static class SubprotocolSpec {
         private final Map<String, SchnorrFragment> subprotocols;
         private final Map<String, SchnorrVariable> variables;
 
@@ -426,20 +437,25 @@ public abstract class SendThenDelegateFragment implements SchnorrFragment {
         }
     }
 
-    public class ProverSpecBuilder {
+    public static class ProverSpecBuilder {
         private SendFirstValue sendFirstValue;
         private SubprotocolSpec subprotocolSpec;
         private final Map<String, SchnorrVariableValue> witnessesForVariables = new HashMap<>();
         private final Map<String, Zn.ZnElement> znWitnesses = new HashMap<>();
         private final Map<String, GroupElement> groupElemWitnesses = new HashMap<>();
         private boolean isBuilt = false;
+        private final SendThenDelegateFragment fragment;
+
+        public ProverSpecBuilder(SendThenDelegateFragment fragment) {
+            this.fragment = fragment;
+        }
 
         public void setSendFirstValue(SendFirstValue sendFirstValue) {
             if (this.sendFirstValue != null)
                 throw new IllegalStateException("Cannot overwrite sendFirstValue");
             this.sendFirstValue = sendFirstValue;
 
-            subprotocolSpec = provideSubprotocolSpec(sendFirstValue);
+            subprotocolSpec = fragment.provideSubprotocolSpec(sendFirstValue, new SubprotocolSpecBuilder());
         }
 
         public SubprotocolSpec getSubprotocolSpec() {
