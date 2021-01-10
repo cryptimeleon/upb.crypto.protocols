@@ -1,16 +1,10 @@
-package de.upb.crypto.clarc.protocols.damgardtechnique;
+package de.upb.crypto.clarc.protocols.arguments.damgardtechnique;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.clarc.protocols.arguments.sigma.Response;
 import de.upb.crypto.craco.commitment.interfaces.OpenValue;
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
 import de.upb.crypto.math.serialization.*;
-import de.upb.crypto.math.serialization.annotations.v2.ReprUtil;
-import de.upb.crypto.math.serialization.annotations.v2.Represented;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The DamgardResponse is used in Damgard's Technique. It consists of the commitment of an announcement, the

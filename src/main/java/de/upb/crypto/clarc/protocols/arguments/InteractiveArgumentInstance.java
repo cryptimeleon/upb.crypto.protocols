@@ -5,7 +5,7 @@ import de.upb.crypto.math.expressions.bool.BooleanExpression;
 
 public interface InteractiveArgumentInstance extends TwoPartyProtocolInstance {
     /**
-     * Call on the verifier after protocol has terminated.
+     * Called on the verifier after protocol has terminated.
      * Returns true if the protocol is accepting (i.e. the prover was able to convince the verifier)
      */
     boolean isAccepting();

@@ -1,8 +1,9 @@
-package de.upb.crypto.clarc.protocols.arguments.sigma;
+package de.upb.crypto.clarc.protocols.arguments.sigma.instance;
 
 import de.upb.crypto.clarc.protocols.CommonInput;
 import de.upb.crypto.clarc.protocols.SecretInput;
 import de.upb.crypto.clarc.protocols.arguments.InteractiveArgumentInstance;
+import de.upb.crypto.clarc.protocols.arguments.sigma.*;
 
 public abstract class SigmaProtocolInstance implements InteractiveArgumentInstance {
     protected SigmaProtocol protocol;

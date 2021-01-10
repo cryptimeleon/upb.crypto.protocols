@@ -7,15 +7,48 @@ import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVa
 import de.upb.crypto.math.interfaces.hash.ByteAccumulator;
 import de.upb.crypto.math.serialization.Representation;
 
+import java.math.BigInteger;
+
+/**
+ * <p>The protocol version of {@link SendThenDelegateFragment}.</p>
+ * <p>
+ *     A {@link SchnorrFragment} is always incomplete in the sense that it depends on external variables.
+ *     In contrast, a {@link SigmaProtocol} has no external dependencies and, hence, can be run standalone.
+ * </p>
+ * <p>
+ *     An implementation of a {@link SendThenDelegateProtocol} is very similar to an implementation of
+ *     a {@link SendThenDelegateFragment}, except that there are no external {@link de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVariable}s and the protocol
+ *     must define all its variables itself.
+ * </p>
+ */
 public abstract class SendThenDelegateProtocol implements SigmaProtocol {
 
+    /**
+     * Run by the prover to set up (1) the sendFirstValue and
+     * (2) witness values for variables this fragment proves knowledge of itself (i.e. those specified in {@link SendThenDelegateProtocol#provideSubprotocolSpec(CommonInput, SendThenDelegateFragment.SendFirstValue, SendThenDelegateFragment.SubprotocolSpecBuilder)}).
+     *
+     * @see SendThenDelegateFragment#provideProverSpec(SchnorrVariableAssignment, SendThenDelegateFragment.ProverSpecBuilder)
+     */
     protected abstract SendThenDelegateFragment.ProverSpec provideProverSpec(CommonInput commonInput, SecretInput secretInput, SendThenDelegateFragment.ProverSpecBuilder builder);
     protected abstract SendThenDelegateFragment.SendFirstValue recreateSendFirstValue(CommonInput commonInput, Representation repr);
+
+    /**
+     * @see SendThenDelegateFragment#simulateSendFirstValue()
+     */
     protected abstract SendThenDelegateFragment.SendFirstValue simulateSendFirstValue(CommonInput commonInput);
 
+    /**
+     * @see SendThenDelegateFragment#provideProverSpec(SchnorrVariableAssignment, SendThenDelegateFragment.ProverSpecBuilder)
+     */
     protected abstract SendThenDelegateFragment.SubprotocolSpec provideSubprotocolSpec(CommonInput commonInput, SendThenDelegateFragment.SendFirstValue sendFirstValue, SendThenDelegateFragment.SubprotocolSpecBuilder builder);
 
+    /**
+     * @see SendThenDelegateFragment#provideAdditionalCheck(SendThenDelegateFragment.SendFirstValue)
+     */
     protected abstract boolean provideAdditionalCheck(CommonInput commonInput, SendThenDelegateFragment.SendFirstValue sendFirstValue);
+
+    @Override
+    public abstract BigInteger getChallengeSpaceSize(CommonInput commonInput);
 
     @Override
     public AnnouncementSecret generateAnnouncementSecret(CommonInput commonInput, SecretInput secretInput) {
@@ -32,23 +65,30 @@ public abstract class SendThenDelegateProtocol implements SigmaProtocol {
     }
 
     @Override
-    public abstract SchnorrChallenge generateChallenge(CommonInput commonInput);
+    public SchnorrChallenge generateChallenge(CommonInput commonInput) {
+        return SchnorrChallenge.random(getChallengeSpaceSize(commonInput));
+    }
+
+    @Override
+    public Challenge createChallengeFromBytes(CommonInput commonInput, byte[] bytes) {
+        return new SchnorrChallenge(new BigInteger(1, bytes));
+    }
 
     @Override
     public Response generateResponse(CommonInput commonInput, SecretInput secretInput, Announcement announcement, AnnouncementSecret announcementSecret, Challenge challenge) {
         SchnorrAnnouncementSecret announcementSecret1 = (SchnorrAnnouncementSecret) announcementSecret;
-        return announcementSecret1.fragment.generateResponse(SchnorrVariableAssignment.EMPTY, announcementSecret1.fragmentAnnouncementSecret, challenge);
+        return announcementSecret1.fragment.generateResponse(SchnorrVariableAssignment.EMPTY, announcementSecret1.fragmentAnnouncementSecret, (SchnorrChallenge) challenge);
     }
 
     @Override
     public boolean checkTranscript(CommonInput commonInput, Announcement announcement, Challenge challenge, Response response) {
-        return ((SchnorrAnnouncement) announcement).fragment.checkTranscript(((SchnorrAnnouncement) announcement).fragmentAnnouncement, challenge, response, SchnorrVariableAssignment.EMPTY);
+        return ((SchnorrAnnouncement) announcement).fragment.checkTranscript(((SchnorrAnnouncement) announcement).fragmentAnnouncement, (SchnorrChallenge) challenge, response, SchnorrVariableAssignment.EMPTY);
     }
 
     @Override
     public SigmaProtocolTranscript generateSimulatedTranscript(CommonInput commonInput, Challenge challenge) {
         TopLevelSchnorrFragment fragment = new TopLevelSchnorrFragment(commonInput);
-        return fragment.generateSimulatedTranscript(challenge, SchnorrVariableAssignment.EMPTY);
+        return fragment.generateSimulatedTranscript((SchnorrChallenge) challenge, SchnorrVariableAssignment.EMPTY);
     }
 
     @Override
@@ -67,7 +107,7 @@ public abstract class SendThenDelegateProtocol implements SigmaProtocol {
         return ((SchnorrAnnouncement) announcement).fragment.recreateResponse(((SchnorrAnnouncement) announcement).fragmentAnnouncement, repr);
     }
 
-    public static class SchnorrAnnouncementSecret implements AnnouncementSecret {
+    private static class SchnorrAnnouncementSecret implements AnnouncementSecret {
         public final TopLevelSchnorrFragment fragment;
         public final AnnouncementSecret fragmentAnnouncementSecret;
 
@@ -77,7 +117,7 @@ public abstract class SendThenDelegateProtocol implements SigmaProtocol {
         }
     }
 
-    public static class SchnorrAnnouncement implements Announcement {
+    private static class SchnorrAnnouncement implements Announcement {
         public final SchnorrFragment fragment;
         public final Announcement fragmentAnnouncement;
 
@@ -97,7 +137,7 @@ public abstract class SendThenDelegateProtocol implements SigmaProtocol {
         }
     }
 
-    public class TopLevelSchnorrFragment extends SendThenDelegateFragment {
+    private class TopLevelSchnorrFragment extends SendThenDelegateFragment {
         public final CommonInput commonInput;
         public final SecretInput secretInput;
 
@@ -111,7 +151,7 @@ public abstract class SendThenDelegateProtocol implements SigmaProtocol {
         }
 
         @Override
-        protected ProverSpec provideProverSpec(SchnorrVariableAssignment outerWitnesses, ProverSpecBuilder builder) {
+        protected ProverSpec provideProverSpec(SchnorrVariableAssignment externalWitnesses, ProverSpecBuilder builder) {
             return SendThenDelegateProtocol.this.provideProverSpec(commonInput, secretInput, builder);
         }
 

@@ -7,12 +7,14 @@ import de.upb.crypto.math.serialization.annotations.v2.RepresentationRestorer;
 import java.lang.reflect.Type;
 
 /**
- * A variable in the context of SchnorrFragments.
+ * <p>A variable in the context of SchnorrFragments.</p>
  *
- * This is only the (static) variable. SchnorrVariableValue represents a concrete value.
+ * <p>This is only the (static) variable. SchnorrVariableValue represents a concrete value.</p>
  *
- * Variables are named only for debuggability.
+ * <p>
+ * Variables are named only for debuggability.<br>
  * Two variables are equal iff they are the same object.
+ * </p>
  */
 public abstract class SchnorrVariable implements RepresentationRestorer, VariableExpression {
     public final String name;

@@ -6,7 +6,7 @@ import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrVa
 import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrZnVariable;
 import de.upb.crypto.math.expressions.exponent.ExponentEmptyExpr;
 import de.upb.crypto.math.expressions.exponent.ExponentExpr;
-import de.upb.crypto.math.factory.BilinearGroup;
+import de.upb.crypto.math.pairings.generic.BilinearGroup;
 import de.upb.crypto.math.structures.integers.IntegerRing;
 import de.upb.crypto.math.structures.zn.Zn;
 
@@ -14,12 +14,22 @@ import java.math.BigInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * A fragment to prove a statement of the form "0 ≤ member < base^power"
+ */
 public class SmallerThanPowerFragment extends DelegateFragment {
     protected final int base;
     protected final int power;
     protected final ExponentExpr member;
     protected final SetMembershipPublicParameters pp;
 
+    /**
+     * Instantiates the fragment.
+     * @param member an expression whose value shall be between 0 and base^power. In the easiest case, this is a {@link SchnorrZnVariable}, but it can be any linear combination of {@link SchnorrZnVariable}s.
+     * @param base a number (generally the bigger this number, the bigger the public parameters but the shorter the proof)
+     * @param power a number (protocol computation and communication cost is linear in this number)
+     * @param pp honestly generated public parameters for a set membership proof for {0, ..., base-1}. Can be generated {@link SmallerThanPowerFragment#generatePublicParameters(BilinearGroup, int)}
+     */
     public SmallerThanPowerFragment(ExponentExpr member, int base, int power, SetMembershipPublicParameters pp) {
         this.base = base;
         this.power = power;
@@ -30,13 +40,18 @@ public class SmallerThanPowerFragment extends DelegateFragment {
             throw new IllegalArgumentException("Unfit SetMembershiptPublicParameters");
     }
 
+    /**
+     * Generates public parameters to use for a given base.
+     * @param group the group to use for this fragment
+     * @param base the desired base (see constructor).
+     */
     public static SetMembershipPublicParameters generatePublicParameters(BilinearGroup group, int base) {
         return SetMembershipPublicParameters.generate(group, IntStream.range(0, base).mapToObj(BigInteger::valueOf).collect(Collectors.toSet()));
     }
 
     @Override
-    protected ProverSpec provideProverSpecWithNoSendFirst(SchnorrVariableAssignment outerWitnesses, ProverSpecBuilder builder) {
-        Zn.ZnElement memberVal = this.member.evaluate(pp.getZn(), outerWitnesses);
+    protected ProverSpec provideProverSpecWithNoSendFirst(SchnorrVariableAssignment externalWitnesses, ProverSpecBuilder builder) {
+        Zn.ZnElement memberVal = this.member.evaluate(pp.getZn(), externalWitnesses);
 
         //Decompose memberVal into digits
         BigInteger[] digits = IntegerRing.decomposeIntoDigits(memberVal.getInteger(), BigInteger.valueOf(base), power);

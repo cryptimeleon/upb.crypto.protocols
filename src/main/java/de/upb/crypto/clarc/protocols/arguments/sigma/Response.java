@@ -6,6 +6,9 @@ import de.upb.crypto.math.serialization.ObjectRepresentation;
 import de.upb.crypto.math.serialization.Representable;
 import de.upb.crypto.math.serialization.Representation;
 
+/**
+ * A {@link SigmaProtocol}'s third message.
+ */
 public interface Response extends Representable, UniqueByteRepresentable {
     static EmptyResponse EMPTY = new EmptyResponse();
     class EmptyResponse implements Response {

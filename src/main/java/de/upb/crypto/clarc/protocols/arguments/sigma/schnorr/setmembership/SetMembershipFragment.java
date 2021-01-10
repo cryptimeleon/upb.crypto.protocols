@@ -9,24 +9,35 @@ import de.upb.crypto.math.interfaces.structures.GroupElement;
 import de.upb.crypto.math.serialization.Representation;
 import de.upb.crypto.math.structures.zn.Zn;
 
+/**
+ * A fragment to prove that a given variable is in a set of allowed values.
+ */
 public class SetMembershipFragment extends SendThenDelegateFragment {
     private final SetMembershipPublicParameters pp;
     private final ExponentExpr member;
 
+    /**
+     * Instantiates the fragment.
+     *
+     * @param pp public parameters to use (implicitly defines the set for which membership is proven, see {@link SetMembershipPublicParameters}).
+     * @param member an expression whose value shall be in the set. In the easiest case, this is a {@link SchnorrZnVariable}, but it can be any linear combination of {@link SchnorrZnVariable}s.
+     */
     public SetMembershipFragment(SetMembershipPublicParameters pp, ExponentExpr member) {
         this.pp = pp;
         this.member = member;
     }
 
     @Override
-    protected ProverSpec provideProverSpec(SchnorrVariableAssignment outerWitnesses, ProverSpecBuilder builder) {
+    protected ProverSpec provideProverSpec(SchnorrVariableAssignment externalWitnesses, ProverSpecBuilder builder) {
         Zn.ZnElement r = pp.getZn().getUniformlyRandomNonzeroElement();
         builder.putWitnessValue("r", r);
 
         //Compute member with respect to given witnesses
-        Zn.ZnElement memberVal = member.evaluate(pp.getZn(), outerWitnesses);
+        Zn.ZnElement memberVal = member.evaluate(pp.getZn(), externalWitnesses);
 
         //Pick the right signature for memberVal
+        if (!pp.signatures.containsKey(memberVal.getInteger()))
+            throw new IllegalArgumentException("Proposed member value is not actually in the set. Illegal witness.");
         GroupElement signature = pp.signatures.get(memberVal.getInteger());
 
         //Blind signature with blinding value

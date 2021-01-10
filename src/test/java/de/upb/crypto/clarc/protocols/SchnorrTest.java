@@ -1,20 +1,20 @@
 package de.upb.crypto.clarc.protocols;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocol;
-import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolProverInstance;
-import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocolVerifierInstance;
-import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.*;
+import de.upb.crypto.clarc.protocols.arguments.sigma.instance.SigmaProtocolProverInstance;
+import de.upb.crypto.clarc.protocols.arguments.sigma.instance.SigmaProtocolVerifierInstance;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.DelegateProtocol;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.LinearStatementFragment;
+import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.SendThenDelegateFragment;
 import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.setmembership.SetMembershipPublicParameters;
 import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.setmembership.SmallerThanPowerFragment;
 import de.upb.crypto.clarc.protocols.arguments.sigma.schnorr.variables.SchnorrZnVariable;
-import de.upb.crypto.math.factory.BilinearGroup;
 import de.upb.crypto.math.interfaces.structures.Group;
 import de.upb.crypto.math.interfaces.structures.GroupElement;
-import de.upb.crypto.math.pairings.debug.count.CountingBilinearGroup;
-import de.upb.crypto.math.pairings.debug.count.CountingGroup;
+import de.upb.crypto.math.pairings.counting.CountingBilinearGroup;
+import de.upb.crypto.math.pairings.counting.CountingGroup;
+import de.upb.crypto.math.pairings.generic.BilinearGroup;
 import de.upb.crypto.math.serialization.Representation;
-import de.upb.crypto.math.structures.cartesian.GroupElementVector;
-import de.upb.crypto.math.structures.cartesian.RingElementVector;
 import de.upb.crypto.math.structures.zn.Zn;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ import java.math.BigInteger;
 
 public class SchnorrTest {
     public static Group group = new CountingGroup("test", BigInteger.valueOf(13));
-    public static BilinearGroup bilGroup = new CountingBilinearGroup(BilinearGroup.Type.TYPE_3, BigInteger.valueOf(13), false);
+    public static BilinearGroup bilGroup = new CountingBilinearGroup(128, BilinearGroup.Type.TYPE_3,1);
 
     protected void runProtocol(SigmaProtocol protocol, CommonInput commonInput, SecretInput secretInput) {
         SigmaProtocolProverInstance prover = protocol.getProverInstance(commonInput, secretInput);
@@ -62,9 +62,10 @@ public class SchnorrTest {
             }
 
             @Override
-            public SchnorrChallenge generateChallenge(CommonInput commonInput) {
-                return SchnorrChallenge.random(group.size());
+            public BigInteger getChallengeSpaceSize(CommonInput commonInput) {
+                return group.size();
             }
+
         }, CommonInput.EMPTY, SecretInput.EMPTY);
     }
 
@@ -80,6 +81,11 @@ public class SchnorrTest {
         SetMembershipPublicParameters setMembershipPublicParameters = SmallerThanPowerFragment.generatePublicParameters(bilGroup, 2);
 
         runProtocol(new DelegateProtocol() {
+            @Override
+            public BigInteger getChallengeSpaceSize(CommonInput commonInput) {
+                return bilGroup.getG1().size();
+            }
+
             @Override
             protected SendThenDelegateFragment.ProverSpec provideProverSpecWithNoSendFirst(CommonInput commonInput, SecretInput secretInput, SendThenDelegateFragment.ProverSpecBuilder builder) {
                 builder.putWitnessValue("m", m);
@@ -99,11 +105,6 @@ public class SchnorrTest {
                 builder.addSubprotocol("range", new SmallerThanPowerFragment(mVar, 2, 5, setMembershipPublicParameters));
 
                 return builder.build();
-            }
-
-            @Override
-            public SchnorrChallenge generateChallenge(CommonInput commonInput) {
-                return SchnorrChallenge.random(group.size());
             }
         }, CommonInput.EMPTY, SecretInput.EMPTY);
     }

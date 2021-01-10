@@ -1,4 +1,4 @@
-package de.upb.crypto.clarc.protocols.damgardtechnique;
+package de.upb.crypto.clarc.protocols.arguments.damgardtechnique;
 
 import de.upb.crypto.clarc.protocols.arguments.sigma.Announcement;
 import de.upb.crypto.craco.commitment.interfaces.Commitment;

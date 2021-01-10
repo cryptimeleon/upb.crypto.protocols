@@ -48,35 +48,35 @@ public class LinearStatementFragment implements SchnorrFragment {
     }
 
     @Override
-    public AnnouncementSecret generateAnnouncementSecret(SchnorrVariableAssignment outerWitnesses) {
+    public AnnouncementSecret generateAnnouncementSecret(SchnorrVariableAssignment externalWitnesses) {
         return AnnouncementSecret.EMPTY;
     }
 
     @Override
-    public Announcement generateAnnouncement(SchnorrVariableAssignment outerWitnesses, AnnouncementSecret announcementSecret, SchnorrVariableAssignment outerRandom) {
+    public Announcement generateAnnouncement(SchnorrVariableAssignment externalWitnesses, AnnouncementSecret announcementSecret, SchnorrVariableAssignment externalRandom) {
         //Evaluate homomorphicPart with respect random variable assignements from the AnnouncementSecret and the random assignments coming from the outside.
         return new LinearStatementAnnouncement(
-                homomorphicPart.evaluate(outerRandom)
+                homomorphicPart.evaluate(externalRandom)
         );
     }
 
     @Override
-    public Response generateResponse(SchnorrVariableAssignment outerWitnesses, AnnouncementSecret announcementSecret, Challenge challenge) {
+    public Response generateResponse(SchnorrVariableAssignment externalWitnesses, AnnouncementSecret announcementSecret, SchnorrChallenge challenge) {
         return Response.EMPTY;
     }
 
     @Override
-    public boolean checkTranscript(Announcement announcement, Challenge challenge, Response response, SchnorrVariableAssignment outerResponse) {
+    public boolean checkTranscript(Announcement announcement, SchnorrChallenge challenge, Response response, SchnorrVariableAssignment externalResponse) {
         //Check homomorphicPart(response) = announcement + c * target (additive group notation)
-        GroupElement evaluatedResponse = homomorphicPart.evaluate(outerResponse);
+        GroupElement evaluatedResponse = homomorphicPart.evaluate(externalResponse);
 
-        return evaluatedResponse.equals(((LinearStatementAnnouncement) announcement).announcement.op(target.pow(((SchnorrChallenge) challenge).getChallenge())));
+        return evaluatedResponse.equals(((LinearStatementAnnouncement) announcement).announcement.op(target.pow(challenge.getChallenge())));
     }
 
     @Override
-    public SigmaProtocolTranscript generateSimulatedTranscript(Challenge challenge, SchnorrVariableAssignment outerRandomResponse) {
-        //Take outerRandomResponse, set annoncement to the unique value that makes the transcript valid.
-        GroupElement announcement = homomorphicPart.evaluate(outerRandomResponse).op(target.pow(((SchnorrChallenge) challenge).getChallenge()).inv());
+    public SigmaProtocolTranscript generateSimulatedTranscript(SchnorrChallenge challenge, SchnorrVariableAssignment externalRandomResponse) {
+        //Take externalRandomResponse, set annoncement to the unique value that makes the transcript valid.
+        GroupElement announcement = homomorphicPart.evaluate(externalRandomResponse).op(target.pow(challenge.getChallenge()).inv());
 
         return new SigmaProtocolTranscript(new LinearStatementAnnouncement(announcement), challenge, Response.EMPTY);
     }

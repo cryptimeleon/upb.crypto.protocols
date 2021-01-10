@@ -1,9 +1,9 @@
-package de.upb.crypto.clarc.protocols.arguments.sigma;
+package de.upb.crypto.clarc.protocols.arguments.sigma.instance;
 
 import de.upb.crypto.clarc.protocols.CommonInput;
 import de.upb.crypto.clarc.protocols.SecretInput;
 import de.upb.crypto.clarc.protocols.arguments.InteractiveArgument;
-import de.upb.crypto.math.expressions.bool.BooleanExpression;
+import de.upb.crypto.clarc.protocols.arguments.sigma.SigmaProtocol;
 import de.upb.crypto.math.serialization.Representation;
 
 public class SigmaProtocolProverInstance extends SigmaProtocolInstance {

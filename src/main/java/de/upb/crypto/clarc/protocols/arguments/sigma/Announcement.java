@@ -5,6 +5,9 @@ import de.upb.crypto.math.interfaces.hash.UniqueByteRepresentable;
 import de.upb.crypto.math.serialization.Representable;
 import de.upb.crypto.math.serialization.Representation;
 
+/**
+ * A {@link SigmaProtocol}'s first message.
+ */
 public interface Announcement extends Representable, UniqueByteRepresentable {
     EmptyAnnouncement EMPTY = new EmptyAnnouncement();
 

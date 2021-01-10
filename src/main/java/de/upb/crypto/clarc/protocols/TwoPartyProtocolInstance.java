@@ -3,7 +3,7 @@ package de.upb.crypto.clarc.protocols;
 import de.upb.crypto.math.serialization.Representation;
 
 /**
- * An instance of a TwoPartyProtocol, modeling a single protocol run from one of the role's perspectives.
+ * An instance of a TwoPartyProtocol, modeling a single protocol run from one of the roles' perspective.
  */
 public interface TwoPartyProtocolInstance {
     TwoPartyProtocol getProtocol();

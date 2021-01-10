@@ -1,4 +1,4 @@
-package de.upb.crypto.clarc.protocols.damgardtechnique;
+package de.upb.crypto.clarc.protocols.arguments.damgardtechnique;
 
 import de.upb.crypto.clarc.protocols.CommonInput;
 import de.upb.crypto.clarc.protocols.SecretInput;
@@ -7,9 +7,9 @@ import de.upb.crypto.craco.commitment.interfaces.CommitmentPair;
 import de.upb.crypto.craco.commitment.interfaces.CommitmentScheme;
 import de.upb.crypto.craco.enc.sym.streaming.aes.ByteArrayImplementation;
 import de.upb.crypto.craco.interfaces.PlainText;
-import de.upb.crypto.math.expressions.bool.BoolConstantExpr;
-import de.upb.crypto.math.expressions.bool.BooleanExpression;
 import de.upb.crypto.math.serialization.Representation;
+
+import java.math.BigInteger;
 
 /**
  * This class provides Damgard's Technique. Damgard's Technique is a construction to improve Sigma-Protocols in order to
@@ -108,6 +108,16 @@ public class DamgardTechnique implements SigmaProtocol {
         return new DamgardResponse(innerProtocol.recreateResponse(commonInput, innerAnnouncement, challenge, repr.obj().get("innerResponse")),
                 innerAnnouncement,
                 commitmentScheme.getOpenValue(repr.obj().get("openValue")));
+    }
+
+    @Override
+    public Challenge createChallengeFromBytes(CommonInput commonInput, byte[] bytes) {
+        return innerProtocol.createChallengeFromBytes(commonInput, bytes);
+    }
+
+    @Override
+    public BigInteger getChallengeSpaceSize(CommonInput commonInput) {
+        return innerProtocol.getChallengeSpaceSize(commonInput);
     }
 
     protected PlainText announcementToCommitmentPlaintext(Announcement innerAnnouncement) {
